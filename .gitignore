@@ -1,0 +1,14 @@
+.project
+.settings
+__pycache__
+.pydevproject
+*.rpm
+*tar.gz
+*.javabin
+*.asc
+*.dmp
+*.gpg
+*.log
+*.csv
+*.dsv
+logs/*.log
