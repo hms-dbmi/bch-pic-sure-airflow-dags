@@ -25,13 +25,16 @@ def begin_pipeline(**kwargs):
     print("begin_pipeline:")
     dp = DagPebbles()
     log_file = kwargs['dag_run'].conf.get('log_file')
-    kwargs["ti"].xcom_push(key=o['key'], value=log_file) 
+    kwargs["ti"].xcom_push(key="log_file", value=log_file) 
     print("log_file: ",log_file)
     #TODO::
 
 def pipeline_enable_check(**kwargs):
     dp = DagPebbles()
-    if dp.pipeline_enable_check('DATA_PIPELINE_INITIATOR'):
+    if dp.pipeline_enable_check('DATA_PIPELINE_INITIATOR'): 
+        #TODO:: get it from db
+        kwargs["ti"].xcom_push(key="SKIP_DOWNLOAD_LOG_FILE", value='N') 
+        kwargs["ti"].xcom_push(key="SKIP_DECRYPT_LOG_FILE", value='N')  
         return "pipeline_check_passed"
     else:
         return "pipeline_check_skipped" 
