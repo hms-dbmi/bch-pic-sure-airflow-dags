@@ -26,6 +26,7 @@ def begin_pipeline(**kwargs):
     dp = DagPebbles()
     log_file = kwargs['dag_run'].conf.get('log_file')
     kwargs["ti"].xcom_push(key="log_file", value=log_file) 
+    kwargs["ti"].xcom_push(key="S3_BUCKET", value=os.environ.get("S3_BUCKET",""))
     print("log_file: ",log_file)
     #TODO::
 
@@ -51,7 +52,7 @@ def save_pipeline_log(**kwargs):
 def validate_log_file(**kwargs):
     print("validate_log_file:") 
     dp = DagPebbles()
-    if dp.validate_log_file(kwargs['dag_run'].conf.get('log_file')):
+    if dp.validate_pipeline_log(kwargs['dag_run'].conf.get('log_file')):
         return "pipeline_log_validation_passed"  
     else:
         return "pipeline_log_validation_failed"  
@@ -117,13 +118,13 @@ t_pipeline_check_passed = PythonOperator(
     dag=dag,
 )
 
-download_log_file_cmd = "/opt/bitnami/airflow/airflow-data/scripts/download_s3_file.sh  " + "{{ dag_run.conf['log_file'] }} {{ ti.xcom_pull(key='SKIP_DOWNLOAD_LOG_FILE')}} "
+download_log_file_cmd = "/opt/bitnami/airflow/airflow-data/scripts/download_s3_file.sh  " + "{{ dag_run.conf['log_file'] }} {{ ti.xcom_pull(key='S3_BUCKET')}} {{ ti.xcom_pull(key='SKIP_DOWNLOAD_LOG_FILE')}} "
 t_download_log_file = BashOperator(
     task_id='download_log_file',
     bash_command=download_log_file_cmd,
     dag=dag)
 
-decrypt_log_file_cmd = "/opt/bitnami/airflow/airflow-data/scripts/decrypt_s3_file.sh  " + "{{ dag_run.conf['log_file'] }} {{ ti.xcom_pull(key='SKIP_DECRYPT_LOG_FILE')}} "
+decrypt_log_file_cmd = "/opt/bitnami/airflow/airflow-data/scripts/decrypt_s3_file.sh  " + "{{ dag_run.conf['log_file'] }} {{ dag_run.conf['log_file'] }} {{ ti.xcom_pull(key='SKIP_DECRYPT_LOG_FILE')}} "
 t_decrypt_log_file = BashOperator(
     task_id='decrypt_log_file',
     bash_command=decrypt_log_file_cmd,
@@ -143,14 +144,14 @@ t_validate_log_file = BranchPythonOperator(
     dag=dag,
 )
 
-t_pipeline_log_validation_failed = BranchPythonOperator(
+t_pipeline_log_validation_failed = PythonOperator(
     task_id="pipeline_log_validation_failed",
     python_callable=pipeline_log_validation_failed,
     provide_context=True,
     dag=dag,
 )
 
-t_pipeline_log_validation_passed = BranchPythonOperator(
+t_pipeline_log_validation_passed = PythonOperator(
     task_id="pipeline_log_validation_passed",
     python_callable=pipeline_log_validation_passed,
     provide_context=True,

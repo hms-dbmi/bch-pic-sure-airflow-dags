@@ -4,7 +4,6 @@
 import os
 from collections import OrderedDict
 import json
-import fire
 from scripts.configurations import *
 
 class OracleLogFileParser:

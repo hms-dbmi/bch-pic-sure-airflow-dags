@@ -6,6 +6,7 @@ import subprocess, signal
 from collections import OrderedDict
 from scripts.oracle_data_access import OracleDataAccess
 from scripts.configurations import *
+from scripts.oracle_log_file_parser import OracleLogFileParser
 
 class DagPebbles:
     
