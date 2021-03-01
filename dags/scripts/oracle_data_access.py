@@ -54,6 +54,72 @@ class OracleDataAccess:
 
         return retValue    
     
+    
+    
+   def get_current_pipeline_dmp_files(self):
+        print("get_current_pipeline_dmp_files")    
+        conn = None
+        cur = None
+        files = []
+        try:
+            conn = self.get_db_connection()
+            cur = conn.cursor() 
+            statement = (
+                "select log_file_id from  PIPELINES where status in ('RUNNING')"
+            )
+            cur.execute(statement, {})
+            row = cur.fetchone() 
+            
+            print(row[0])
+            log_file_id = row[0]
+            files = self.get_files_to_download(log_file_id)
+            
+        except cx_Oracle.DatabaseError as e: 
+            raise
+            
+        finally:
+            if cur!=None:
+                cur.close()
+                
+            if conn!=None:
+                conn.close()
+
+        return files
+        
+     
+   def get_files_to_download(self, log_file_id):
+        print("get_files_to_download() for {0}: ".format(log_file_id))
+        files = []
+        
+        conn = None
+        cur = None
+        try:
+            conn = self.get_db_connection()
+            cur = conn.cursor() 
+            statement = (
+                "select log_file_id, dmp_file_name from  LOG_FILE_DMP_FILES where log_file_id in (:log_file_id)"
+            )
+            cur.execute(statement, {"log_file_id": log_file_id})
+            rows = cur.fetchall() 
+            
+            print(rows)
+            
+            if rows != None:
+                for row in rows:
+                    files.append(row[1])
+                    
+        except cx_Oracle.DatabaseError as e: 
+            raise
+            
+        finally:
+            if cur!=None:
+                cur.close()
+                
+            if conn!=None:
+                conn.close()
+
+        return files
+    
    def save_pipeline_log(self, log_file_name, log_data):
         print("save_pipeline_log(): log_file_name:{0}".format(log_file_name))
         
@@ -104,9 +170,4 @@ class OracleDataAccess:
                 cur.close()
                 
             if conn!=None:
-                conn.close() 
-                 
-                
-                
-                 
-     
+                conn.close()  

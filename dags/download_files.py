@@ -23,36 +23,21 @@ default_args = {
 
 def begin_pipeline(**kwargs):
     print("begin_pipeline:")
-    dp = DagPebbles()
-    log_file_id = kwargs['dag_run'].conf.get('log_file_id')
-    kwargs["ti"].xcom_push(key=o['key'], value=log_file_id) 
-    print("log_file_id: ",log_file_id)
-    #TODO::
-
+    #TODO:: 
+    
 def pipeline_enable_check(**kwargs):
     dp = DagPebbles()
     if dp.pipeline_enable_check('DOWNLOAD_FILES'):
+        kwargs["ti"].xcom_push(key="S3_BUCKET", value="Y")
         return "pipeline_check_passed"
     else:
         return "pipeline_check_skipped" 
 
 def pipeline_check_passed(**kwargs):
     print("pipeline_check_passed:")  
-  
-def validate_files(**kwargs):
-    print("validate_files:") 
-    dp = DagPebbles()
-    if dp.validate_files(kwargs['dag_run'].conf.get('log_file_id')):
-        return "file_validations_passed"  
-    else:
-        return "file_validations_failed"  
-
-def file_validations_passed(**kwargs):
-    print("file_validations_passed:")
     
-def file_validations_failed(**kwargs):
-    print("file_validations_failed:")
-                
+def download(**kwargs):
+    print("download:")                
 
 def end_pipeline(**kwargs):
     print("end_pipeline:")
@@ -75,86 +60,103 @@ def end(**kwargs):
     dp = DagPebbles()
     print("end")             
 
+with DAG( "DOWNLOAD_FILES",
+          description="Download Data Pipeline Input Files",
+          default_args=default_args,
+          schedule_interval=None,
+          catchup=False,
+          orientation="TB",
+          tags=['DOWNLOADS'],
+          dagrun_timeout=timedelta(hours=1)
+    ) as dag:
+     
 
-dag = DAG(
-    "DOWNLOAD_FILES",
-    description="Download Data Pipeline Input Files",
-    default_args=default_args,
-    schedule_interval=None,
-    catchup=False,
-    orientation="TB",
-    tags=['CHECKS'],
-    dagrun_timeout=timedelta(hours=1)
-)
-
-t_pipeline_begin = PythonOperator(
-    task_id="begin_pipeline",
-    python_callable=begin_pipeline,
-    provide_context=True,
-    dag=dag,
-)
-
-t_check_pipeline = BranchPythonOperator(
-    task_id="check_pipeline",
-    python_callable=pipeline_enable_check,
-    provide_context=True,
-    dag=dag,
-)
-
-t_pipeline_check_passed = PythonOperator(
-    task_id="pipeline_check_passed",
-    python_callable=pipeline_check_passed,
-    provide_context=True,
-    dag=dag,
-)
-  
-
-
-t_pipeline_check_skipped = PythonOperator(
-    task_id="pipeline_check_skipped",
-    python_callable=pipeline_check_skipped,
-    provide_context=True,
-    dag=dag,
-)
-
-t_end_pipeline = PythonOperator(
-    task_id="end_pipeline",
-    python_callable=end_pipeline,
-    provide_context=True,
-    trigger_rule="none_failed",
-    dag=dag,
-)
-
-t_notify = PythonOperator(
-    task_id="send_notifications",
-    python_callable=notify,
-    provide_context=True,
-    trigger_rule="none_failed",
-    dag=dag,
-)
-
-t_cleanup = PythonOperator(
-    task_id="cleanup",
-    python_callable=cleanup,
-    provide_context=True,
-    trigger_rule="none_failed",
-    dag=dag,
-)
-
-t_end = PythonOperator(
-    task_id="end",
-    python_callable=end,
-    provide_context=True,
-    trigger_rule="none_failed",
-    dag=dag,
-)
+    t_pipeline_begin = PythonOperator(
+        task_id="begin_pipeline",
+        python_callable=begin_pipeline,
+        provide_context=True,
+        dag=dag,
+    )
     
-
-t_pipeline_begin >> t_check_pipeline
-t_check_pipeline >> t_pipeline_check_skipped >> t_end_pipeline
-t_check_pipeline >> t_pipeline_check_passed >> t_end_pipeline 
-
-
- 
- 
-t_end_pipeline >> t_cleanup >> t_notify >> t_end
+    t_check_pipeline = BranchPythonOperator(
+        task_id="check_pipeline",
+        python_callable=pipeline_enable_check,
+        provide_context=True,
+        dag=dag,
+    )
+    
+    t_pipeline_check_passed = PythonOperator(
+        task_id="pipeline_check_passed",
+        python_callable=pipeline_check_passed,
+        provide_context=True,
+        dag=dag,
+    )
+    
+    
+    t_pipeline_check_skipped = PythonOperator(
+        task_id="pipeline_check_skipped",
+        python_callable=pipeline_check_skipped,
+        provide_context=True,
+        dag=dag,
+    )
+    
+    t_end_pipeline = PythonOperator(
+        task_id="end_pipeline",
+        python_callable=end_pipeline,
+        provide_context=True,
+        trigger_rule="none_failed",
+        dag=dag,
+    )
+    
+    t_notify = PythonOperator(
+        task_id="send_notifications",
+        python_callable=notify,
+        provide_context=True,
+        trigger_rule="none_failed",
+        dag=dag,
+    )
+    
+    t_cleanup = PythonOperator(
+        task_id="cleanup",
+        python_callable=cleanup,
+        provide_context=True,
+        trigger_rule="none_failed",
+        dag=dag,
+    )
+    
+    t_end = PythonOperator(
+        task_id="end",
+        python_callable=end,
+        provide_context=True,
+        trigger_rule="none_failed",
+        dag=dag,
+    )
+    
+    
+    t_pipeline_begin >> t_check_pipeline
+    t_check_pipeline >> t_pipeline_check_skipped >> t_end_pipeline 
+    t_check_pipeline >> t_pipeline_check_passed
+    
+    try: 
+        dp = DagPebbles() 
+        files = dp.get_files_to_download(None)
+        #files = ['1','2','3','4','5','6'] 
+        #files = None
+        
+        if files == None or len(files) == 0:
+            t_pipeline_check_passed  >> t_end_pipeline
+        else:
+            for index, file in enumerate(files):
+                download_log_file_cmd = "/opt/bitnami/airflow/airflow-data/scripts/download_s3_file.sh  " + file + " {{ ti.xcom_pull(key='S3_BUCKET')}} {{ ti.xcom_pull(key='DOWNLOAD_FILES')}} "
+                t_download_dmp_file = BashOperator(
+                    task_id='download_dmp_file_'+str(index),
+                    bash_command=download_log_file_cmd,
+                    dag=dag)
+                t_pipeline_check_passed >> t_download_dmp_file >> t_end_pipeline    
+    except Exception as e:
+        print(e) 
+        t_pipeline_check_passed >> t_end_pipeline
+        pass
+     
+    
+    t_end_pipeline >> t_cleanup >> t_notify >> t_end
