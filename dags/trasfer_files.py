@@ -149,7 +149,7 @@ with DAG( "TRANSFER_FILES",
         else:
             for index, file in enumerate(files):
                 target_file = file.replace(".encrypted", "")
-                transfer_file_cmd = "/opt/bitnami/airflow/airflow-data/scripts/transfer_file.sh  " + file +  " {{ ti.xcom_pull(key='SKIP_TRANSFER_FILES')}} "
+                transfer_file_cmd = "perl  /opt/bitnami/airflow/airflow-data/scripts/transfer_file_rds.pl   " +  file + "   {{ ti.xcom_pull(key='SKIP_TRANSFER_FILES')}}"
                 t_transfer_dmp_file = BashOperator(
                     task_id='transfer_dmp_file_'+str(index),
                     bash_command=transfer_file_cmd,
