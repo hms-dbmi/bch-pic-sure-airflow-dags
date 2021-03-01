@@ -29,7 +29,7 @@ def pipeline_enable_check(**kwargs):
     dp = DagPebbles()
     if dp.pipeline_enable_check('DOWNLOAD_FILES'):
         kwargs["ti"].xcom_push(key="S3_BUCKET", value=os.environ.get("S3_BUCKET",""))
-        kwargs["ti"].xcom_push(key="DOWNLOAD_FILES", value="Y")
+        kwargs["ti"].xcom_push(key="SKIP_DOWNLOAD_FILES", value="N")
         return "pipeline_check_passed"
     else:
         return "pipeline_check_skipped" 
@@ -148,7 +148,7 @@ with DAG( "DOWNLOAD_FILES",
             t_pipeline_check_passed  >> t_end_pipeline
         else:
             for index, file in enumerate(files):
-                download_log_file_cmd = "/opt/bitnami/airflow/airflow-data/scripts/download_s3_file.sh  " + file + " {{ ti.xcom_pull(key='S3_BUCKET')}} {{ ti.xcom_pull(key='DOWNLOAD_FILES')}} "
+                download_log_file_cmd = "/opt/bitnami/airflow/airflow-data/scripts/download_s3_file.sh  " + file + " {{ ti.xcom_pull(key='S3_BUCKET')}} {{ ti.xcom_pull(key='SKIP_DOWNLOAD_FILES')}} "
                 t_download_dmp_file = BashOperator(
                     task_id='download_dmp_file_'+str(index),
                     bash_command=download_log_file_cmd,
