@@ -28,7 +28,8 @@ def begin_pipeline(**kwargs):
 def pipeline_enable_check(**kwargs):
     dp = DagPebbles()
     if dp.pipeline_enable_check('DOWNLOAD_FILES'):
-        kwargs["ti"].xcom_push(key="S3_BUCKET", value="Y")
+        kwargs["ti"].xcom_push(key="S3_BUCKET", value=os.environ.get("S3_BUCKET",""))
+        kwargs["ti"].xcom_push(key="DOWNLOAD_FILES", value="Y")
         return "pipeline_check_passed"
     else:
         return "pipeline_check_skipped" 
