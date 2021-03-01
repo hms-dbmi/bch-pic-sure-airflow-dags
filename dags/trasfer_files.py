@@ -10,6 +10,7 @@ from collections import OrderedDict
 from scripts.dag_pebbles import DagPebbles
 from airflow.operators.docker_operator import DockerOperator
 from airflow.configuration import conf
+from scripts.configurations import *
 
 default_args = {
     "owner": "anilkdegala",
@@ -148,7 +149,7 @@ with DAG( "TRANSFER_FILES",
             t_pipeline_check_passed  >> t_end_pipeline
         else:
             for index, file in enumerate(files):
-                target_file = file.replace(".encrypted", "")
+                file = DATA_LOCATION + "/"+ file.replace(".encrypted", "")
                 transfer_file_cmd = "perl  /opt/bitnami/airflow/airflow-data/scripts/transfer_file_rds.pl   " +  file + "   {{ ti.xcom_pull(key='SKIP_TRANSFER_FILES')}}"
                 t_transfer_dmp_file = BashOperator(
                     task_id='transfer_dmp_file_'+str(index),
