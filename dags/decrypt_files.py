@@ -148,10 +148,11 @@ with DAG( "DECRYPT_FILES",
             t_pipeline_check_passed  >> t_end_pipeline
         else:
             for index, file in enumerate(files):
-                download_log_file_cmd = "/opt/bitnami/airflow/airflow-data/scripts/decrypt_s3_file.sh  " + file + " {{ ti.xcom_pull(key='S3_BUCKET')}} {{ ti.xcom_pull(key='SKIP_DECRYPT_FILES')}} "
+                target_file = file.replace(".encrypted", "")
+                decrypt_dmp_file_cmd = "/opt/bitnami/airflow/airflow-data/scripts/decrypt_s3_file.sh  " + file + " " + target_file + " {{ ti.xcom_pull(key='SKIP_DECRYPT_FILES')}} "
                 t_download_dmp_file = BashOperator(
                     task_id='decrypt_dmp_file_'+str(index),
-                    bash_command=download_log_file_cmd,
+                    bash_command=decrypt_dmp_file_cmd,
                     dag=dag)
                 t_pipeline_check_passed >> t_download_dmp_file >> t_end_pipeline    
     except Exception as e:
