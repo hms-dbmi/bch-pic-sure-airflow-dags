@@ -140,7 +140,7 @@ with DAG( "DECRYPT_FILES",
     
     try: 
         dp = DagPebbles() 
-        files = dp.get_files_to_download(None)
+        files = dp.get_files_to_decrypt(None)
         #files = ['1','2','3','4','5','6'] 
         #files = None
         

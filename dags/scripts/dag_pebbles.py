@@ -41,5 +41,15 @@ class DagPebbles:
         return files         
        
      
+    def get_files_to_decrypt(self, log_file_id):
+        print("DagPebbles::get_files_to_decrypt() => log_file_id: {0}".format(log_file_id))
+        oda = OracleDataAccess()
+        if log_file_id == None:
+            files = oda.get_current_pipeline_dmp_files()
+        else:
+            files = oda.get_files_to_download(log_file_id)  
+            
+        return files      
+     
  
     
