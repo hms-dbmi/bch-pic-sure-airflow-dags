@@ -29,7 +29,7 @@ def pipeline_enable_check(**kwargs):
     dp = DagPebbles()
     if dp.pipeline_enable_check('DECRYPT_FILES'):
         kwargs["ti"].xcom_push(key="S3_BUCKET", value=os.environ.get("S3_BUCKET",""))
-        kwargs["ti"].xcom_push(key="SKIP_DECRYPT", value="N")
+        kwargs["ti"].xcom_push(key="SKIP_DECRYPT_FILES", value="N")
         return "pipeline_check_passed"
     else:
         return "pipeline_check_skipped" 
