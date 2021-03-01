@@ -27,9 +27,9 @@ def begin_pipeline(**kwargs):
     
 def pipeline_enable_check(**kwargs):
     dp = DagPebbles()
-    if dp.pipeline_enable_check('DECRYPT_FILES'):
+    if dp.pipeline_enable_check('TRANSFER_FILES'):
         kwargs["ti"].xcom_push(key="S3_BUCKET", value=os.environ.get("S3_BUCKET",""))
-        kwargs["ti"].xcom_push(key="SKIP_DECRYPT_FILES", value="N")
+        kwargs["ti"].xcom_push(key="SKIP_TRANSFER_FILES", value="N")
         return "pipeline_check_passed"
     else:
         return "pipeline_check_skipped" 
@@ -37,8 +37,8 @@ def pipeline_enable_check(**kwargs):
 def pipeline_check_passed(**kwargs):
     print("pipeline_check_passed:")  
     
-def decryt(**kwargs):
-    print("decryt:")                
+def transfer(**kwargs):
+    print("transfer:")                
 
 def end_pipeline(**kwargs):
     print("end_pipeline:")
@@ -61,13 +61,13 @@ def end(**kwargs):
     dp = DagPebbles()
     print("end")             
 
-with DAG( "DECRYPT_FILES",
-          description="Decrypt Data Pipeline Input Files",
+with DAG( "TRANSFER_FILES",
+          description="Transfer Data Pipeline Input Files",
           default_args=default_args,
           schedule_interval=None,
           catchup=False,
           orientation="TB",
-          tags=['DECRYPT'],
+          tags=['TRANSFER'],
           dagrun_timeout=timedelta(hours=1)
     ) as dag:
      
@@ -140,7 +140,7 @@ with DAG( "DECRYPT_FILES",
     
     try: 
         dp = DagPebbles() 
-        files = dp.get_files_to_decrypt(None)
+        files = dp.get_files_to_transfer(None)
         #files = ['1','2','3','4','5','6'] 
         #files = None
         
@@ -149,12 +149,12 @@ with DAG( "DECRYPT_FILES",
         else:
             for index, file in enumerate(files):
                 target_file = file.replace(".encrypted", "")
-                decrypt_dmp_file_cmd = "/opt/bitnami/airflow/airflow-data/scripts/decrypt_s3_file.sh  " + file + " " + target_file + " {{ ti.xcom_pull(key='SKIP_DECRYPT_FILES')}} "
-                t_decrypt_dmp_file = BashOperator(
-                    task_id='decrypt_dmp_file_'+str(index),
-                    bash_command=decrypt_dmp_file_cmd,
+                transfer_file_cmd = "/opt/bitnami/airflow/airflow-data/scripts/transfer_file.sh  " + file +  " {{ ti.xcom_pull(key='SKIP_TRANSFER_FILES')}} "
+                t_transfer_dmp_file = BashOperator(
+                    task_id='transfer_dmp_file_'+str(index),
+                    bash_command=transfer_file_cmd,
                     dag=dag)
-                t_pipeline_check_passed >> t_decrypt_dmp_file >> t_end_pipeline    
+                t_pipeline_check_passed >> t_transfer_dmp_file >> t_end_pipeline    
     except Exception as e:
         print(e) 
         t_pipeline_check_passed >> t_end_pipeline
