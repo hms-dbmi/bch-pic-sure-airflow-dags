@@ -11,6 +11,7 @@ from scripts.dag_pebbles import DagPebbles
 from airflow.operators.docker_operator import DockerOperator
 from airflow.configuration import conf
 from scripts.configurations import *
+from airflow.operators.dummy_operator import DummyOperator
 
 default_args = {
     "owner": "anilkdegala",
@@ -166,6 +167,7 @@ with DAG( "TRANSFER_FILES",
                 t_transfer_log_file >> t_transfer_dmp_file >> t_end_pipeline    
     except Exception as e:
         print(e) 
+        t_transfer_log_file = DummyOperator(dag=dag, task_id='transfer_log_file')
         t_transfer_log_file >> t_end_pipeline
         pass
      

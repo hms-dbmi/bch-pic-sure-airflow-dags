@@ -10,6 +10,7 @@ from collections import OrderedDict
 from scripts.dag_pebbles import DagPebbles
 from airflow.operators.docker_operator import DockerOperator
 from airflow.configuration import conf
+from airflow.operators.dummy_operator import DummyOperator
 
 default_args = {
     "owner": "anilkdegala",
@@ -164,6 +165,7 @@ with DAG( "DECRYPT_FILES",
                 t_decrypt_log_file >> t_decrypt_dmp_file >> t_end_pipeline    
     except Exception as e:
         print(e) 
+        t_decrypt_log_file = DummyOperator(dag=dag, task_id='decrypt_log_file')
         t_decrypt_log_file >> t_end_pipeline
         pass
      
