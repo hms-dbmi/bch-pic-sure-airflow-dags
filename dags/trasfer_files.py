@@ -168,7 +168,7 @@ with DAG( "TRANSFER_FILES",
     except Exception as e:
         print(e) 
         t_transfer_log_file = DummyOperator(dag=dag, task_id='transfer_log_file')
-        t_transfer_log_file >> t_end_pipeline
+        t_pipeline_check_passed >> t_transfer_log_file >> t_end_pipeline
         pass
      
     

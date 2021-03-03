@@ -166,7 +166,7 @@ with DAG( "DECRYPT_FILES",
     except Exception as e:
         print(e) 
         t_decrypt_log_file = DummyOperator(dag=dag, task_id='decrypt_log_file')
-        t_decrypt_log_file >> t_end_pipeline
+        t_pipeline_check_passed >> t_decrypt_log_file >> t_end_pipeline
         pass
      
     

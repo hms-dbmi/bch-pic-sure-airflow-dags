@@ -164,7 +164,7 @@ with DAG( "DOWNLOAD_FILES",
     except Exception as e:
         print(e) 
         t_download_log_file = DummyOperator(dag=dag, task_id='download_log_file')
-        t_download_log_file >> t_end_pipeline
+        t_pipeline_check_passed >> t_download_log_file >> t_end_pipeline
         pass
      
     
