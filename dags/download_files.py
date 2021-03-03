@@ -137,15 +137,21 @@ with DAG( "DOWNLOAD_FILES",
     t_pipeline_begin >> t_check_pipeline
     t_check_pipeline >> t_pipeline_check_skipped >> t_end_pipeline 
     t_check_pipeline >> t_pipeline_check_passed
+
     
     try: 
         dp = DagPebbles() 
-        files = dp.get_files_to_download(None)
-        #files = ['1','2','3','4','5','6'] 
-        #files = None
+        pipeline = dp.get_current_pipeline() 
+        download_log_file_cmd = "/opt/bitnami/airflow/airflow-data/scripts/download_s3_file.sh  " + pipeline['log_file_name'] + " {{ ti.xcom_pull(key='S3_BUCKET')}} N "
+        t_download_log_file = BashOperator(
+            task_id='download_log_file',
+            bash_command=download_log_file_cmd,
+            dag=dag) 
+        t_pipeline_check_passed >> t_download_log_file
         
+        files = dp.get_files(log_file_id = None, type = 'download')
         if files == None or len(files) == 0:
-            t_pipeline_check_passed  >> t_end_pipeline
+            t_download_log_file  >> t_end_pipeline
         else:
             for index, file in enumerate(files):
                 download_log_file_cmd = "/opt/bitnami/airflow/airflow-data/scripts/download_s3_file.sh  " + file + " {{ ti.xcom_pull(key='S3_BUCKET')}} {{ ti.xcom_pull(key='SKIP_DOWNLOAD_FILES')}} "
@@ -153,10 +159,10 @@ with DAG( "DOWNLOAD_FILES",
                     task_id='download_dmp_file_'+str(index),
                     bash_command=download_log_file_cmd,
                     dag=dag)
-                t_pipeline_check_passed >> t_download_dmp_file >> t_end_pipeline    
+                t_download_log_file >> t_download_dmp_file >> t_end_pipeline    
     except Exception as e:
         print(e) 
-        t_pipeline_check_passed >> t_end_pipeline
+        t_download_log_file >> t_end_pipeline
         pass
      
     

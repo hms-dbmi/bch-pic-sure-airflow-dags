@@ -27,39 +27,27 @@ class DagPebbles:
     def validate_pipeline_log(self, log_file):
         print("DagPebbles::validate_pipeline_log()") 
         #TODO::
-        return True
+        return True 
         
-        
-    def get_files_to_download(self, log_file_id):
-        print("DagPebbles::get_files_to_download() => log_file_id: {0}".format(log_file_id))
-        oda = OracleDataAccess()
-        if log_file_id == None:
-            files = oda.get_current_pipeline_dmp_files()
-        else:
-            files = oda.get_files_to_download(log_file_id)  
-            
-        return files         
-       
-     
-    def get_files_to_decrypt(self, log_file_id):
-        print("DagPebbles::get_files_to_decrypt() => log_file_id: {0}".format(log_file_id))
-        oda = OracleDataAccess()
-        if log_file_id == None:
-            files = oda.get_current_pipeline_dmp_files()
-        else:
-            files = oda.get_files_to_download(log_file_id)  
-            
-        return files    
+    def get_files(self, **kwargs):
+        print("DagPebbles::get_files() for {0}".format(kwargs['type']))
+        oda = OracleDataAccess() 
+        files = oda.get_files(**kwargs)
+        print(files)
+        return files       
     
-    def get_files_to_transfer(self, log_file_id):
-        print("DagPebbles::get_files_to_transfer() => log_file_id: {0}".format(log_file_id))
+    def get_current_pipeline(self):
+        print("DagPebbles::get_current_pipeline()")
         oda = OracleDataAccess()
-        if log_file_id == None:
-            files = oda.get_current_pipeline_dmp_files()
-        else:
-            files = oda.get_files_to_download(log_file_id)  
-            
-        return files    
+        return oda.get_current_pipeline()
+    
+    
+    def stage_dmp_files(self, **kwargs):
+        print("DagPebbles::stage_dmp_files()")
+        oda = OracleDataAccess()
+        oda.stage_dmp_files(**kwargs)
+        
+        
       
      
  

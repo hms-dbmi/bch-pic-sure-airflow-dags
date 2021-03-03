@@ -141,12 +141,20 @@ with DAG( "TRANSFER_FILES",
     
     try: 
         dp = DagPebbles() 
-        files = dp.get_files_to_transfer(None)
-        #files = ['1','2','3','4','5','6'] 
-        #files = None
+        pipeline = dp.get_current_pipeline()  
+        log_file = DATA_LOCATION + "/"+ pipeline['log_file_name'].replace(".encrypted", "")
+        transfer_log_file_cmd = "perl  /opt/bitnami/airflow/airflow-data/scripts/transfer_file_rds.pl   " +  log_file + "   {{ ti.xcom_pull(key='SKIP_TRANSFER_FILES')}}"
+        t_transfer_log_file = BashOperator(
+            task_id='transfer_log_file',
+            bash_command=transfer_log_file_cmd,
+            dag=dag)
+        
+        t_pipeline_check_passed >> t_transfer_log_file 
+                        
+        files = dp.get_files(log_file_id = None, type = 'transfer')
         
         if files == None or len(files) == 0:
-            t_pipeline_check_passed  >> t_end_pipeline
+            t_transfer_log_file  >> t_end_pipeline
         else:
             for index, file in enumerate(files):
                 file = DATA_LOCATION + "/"+ file.replace(".encrypted", "")
@@ -155,10 +163,10 @@ with DAG( "TRANSFER_FILES",
                     task_id='transfer_dmp_file_'+str(index),
                     bash_command=transfer_file_cmd,
                     dag=dag)
-                t_pipeline_check_passed >> t_transfer_dmp_file >> t_end_pipeline    
+                t_transfer_log_file >> t_transfer_dmp_file >> t_end_pipeline    
     except Exception as e:
         print(e) 
-        t_pipeline_check_passed >> t_end_pipeline
+        t_transfer_log_file >> t_end_pipeline
         pass
      
     

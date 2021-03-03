@@ -10,6 +10,7 @@ from collections import OrderedDict
 from scripts.dag_pebbles import DagPebbles
 from airflow.operators.docker_operator import DockerOperator
 from airflow.configuration import conf
+from scripts.configurations import *
 
 default_args = {
     "owner": "anilkdegala",
@@ -27,9 +28,7 @@ def begin_pipeline(**kwargs):
     
 def pipeline_enable_check(**kwargs):
     dp = DagPebbles()
-    if dp.pipeline_enable_check('DECRYPT_FILES'):
-        kwargs["ti"].xcom_push(key="S3_BUCKET", value=os.environ.get("S3_BUCKET",""))
-        kwargs["ti"].xcom_push(key="SKIP_DECRYPT_FILES", value="N")
+    if dp.pipeline_enable_check('STAGE_DMP_FILES'):
         return "pipeline_check_passed"
     else:
         return "pipeline_check_skipped" 
@@ -37,8 +36,10 @@ def pipeline_enable_check(**kwargs):
 def pipeline_check_passed(**kwargs):
     print("pipeline_check_passed:")  
     
-def decryt(**kwargs):
-    print("decryt:")                
+def stage_dmp_files(**kwargs):
+    print("stage_dmp_files:") 
+    dp = DagPebbles()  
+    dp.stage_dmp_files(log_file_id = None)    
 
 def end_pipeline(**kwargs):
     print("end_pipeline:")
@@ -61,14 +62,14 @@ def end(**kwargs):
     dp = DagPebbles()
     print("end")             
 
-with DAG( "DECRYPT_FILES",
-          description="Decrypt Data Pipeline Input Files",
+with DAG( "STAGE_DMP_FILES",
+          description="Stage DMP Files",
           default_args=default_args,
           schedule_interval=None,
           catchup=False,
           orientation="TB",
-          tags=['DECRYPT'],
-          dagrun_timeout=timedelta(hours=1)
+          tags=['STAGE'],
+          dagrun_timeout=timedelta(hours=20)
     ) as dag:
      
 
@@ -92,6 +93,13 @@ with DAG( "DECRYPT_FILES",
         provide_context=True,
         dag=dag,
     )
+    
+    t_stage_dmp_files = PythonOperator(
+        task_id="stage_dmp_files",
+        python_callable=stage_dmp_files,
+        provide_context=True,
+        dag=dag,
+    )    
     
     
     t_pipeline_check_skipped = PythonOperator(
@@ -136,36 +144,6 @@ with DAG( "DECRYPT_FILES",
     
     t_pipeline_begin >> t_check_pipeline
     t_check_pipeline >> t_pipeline_check_skipped >> t_end_pipeline 
-    t_check_pipeline >> t_pipeline_check_passed
-    
-    try: 
-        dp = DagPebbles() 
-        pipeline = dp.get_current_pipeline() 
-        target_log_file = pipeline['log_file_name'].replace(".encrypted", "")
-        decrypt_log_file_cmd = "/opt/bitnami/airflow/airflow-data/scripts/decrypt_s3_file.sh  " + pipeline['log_file_name'] + " " + target_log_file + " {{ ti.xcom_pull(key='SKIP_DECRYPT_FILES')}} "
-        t_decrypt_log_file = BashOperator(
-            task_id='decrypt_log_file',
-            bash_command=decrypt_log_file_cmd,
-            dag=dag) 
-        t_pipeline_check_passed >> t_decrypt_log_file 
-                
-        files = dp.get_files(log_file_id = None, type = 'decrypt')
-        
-        if files == None or len(files) == 0:
-            t_decrypt_log_file  >> t_end_pipeline
-        else:
-            for index, file in enumerate(files):
-                target_file = file.replace(".encrypted", "")
-                decrypt_dmp_file_cmd = "/opt/bitnami/airflow/airflow-data/scripts/decrypt_s3_file.sh  " + file + " " + target_file + " {{ ti.xcom_pull(key='SKIP_DECRYPT_FILES')}} "
-                t_decrypt_dmp_file = BashOperator(
-                    task_id='decrypt_dmp_file_'+str(index),
-                    bash_command=decrypt_dmp_file_cmd,
-                    dag=dag)
-                t_decrypt_log_file >> t_decrypt_dmp_file >> t_end_pipeline    
-    except Exception as e:
-        print(e) 
-        t_decrypt_log_file >> t_end_pipeline
-        pass
-     
+    t_check_pipeline >> t_pipeline_check_passed >> t_stage_dmp_files >> t_end_pipeline 
     
     t_end_pipeline >> t_cleanup >> t_notify >> t_end

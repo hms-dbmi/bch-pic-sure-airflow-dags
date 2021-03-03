@@ -54,25 +54,45 @@ class OracleDataAccess:
 
         return retValue    
     
-    
-    
-   def get_current_pipeline_dmp_files(self):
-        print("get_current_pipeline_dmp_files")    
+   def get_current_pipeline(self):
+        print("get_current_pipeline")    
         conn = None
         cur = None
+        pipeline = OrderedDict()
         files = []
         try:
             conn = self.get_db_connection()
             cur = conn.cursor() 
             statement = (
-                "select log_file_id from  PIPELINES where status in ('RUNNING')"
+                "select a.id, a.log_file_name,a.created_at, b.status from PIPELINE_LOG_FILE a, PIPELINES b  where b.status = 'RUNNING' and a.id = b.log_file_id"
             )
             cur.execute(statement, {})
             row = cur.fetchone() 
             
-            print(row[0])
-            log_file_id = row[0]
-            files = self.get_files_to_download(log_file_id)
+            pipeline = {
+                "id": row[0],
+                "log_file_name": row[1],
+                "created_at": row[2],
+                "status": row[3],
+                "files": files
+            }
+            
+            id = row[0]
+            
+            statement = (
+                "select log_file_id, dmp_file_name from  LOG_FILE_DMP_FILES where log_file_id in (:log_file_id)"
+            )
+            cur.execute(statement, {"log_file_id": id})
+            rows = cur.fetchall() 
+            
+             
+            
+            if rows != None:
+                for row in rows:
+                    files.append(row[1])
+                    
+                    
+            pipeline['files'] = files
             
         except cx_Oracle.DatabaseError as e: 
             raise
@@ -84,26 +104,95 @@ class OracleDataAccess:
             if conn!=None:
                 conn.close()
 
-        return files
-        
-     
-   def get_files_to_download(self, log_file_id):
-        print("get_files_to_download() for {0}: ".format(log_file_id))
-        files = []
-        
+        return pipeline       
+    
+   def get_current_log_file_id(self):
+        print("get_current_log_file_id")    
         conn = None
         cur = None
+        log_file_id = None
         try:
             conn = self.get_db_connection()
             cur = conn.cursor() 
             statement = (
-                "select log_file_id, dmp_file_name from  LOG_FILE_DMP_FILES where log_file_id in (:log_file_id)"
+                "select log_file_id from  PIPELINES where status in ('RUNNING')"
+            )
+            cur.execute(statement, {})
+            row = cur.fetchone()  
+            log_file_id = row[0] 
+            
+        except cx_Oracle.DatabaseError as e: 
+            raise
+            
+        finally:
+            if cur!=None:
+                cur.close()
+                
+            if conn!=None:
+                conn.close()
+
+        return log_file_id
+    
+   def _condition(self, **kwargs):
+       
+       type = kwargs['type']
+       
+       if type == 'download':
+           return " and download_file = 'Y' "
+       elif type == 'decrypt':
+           return " and decrypt_file = 'Y' "
+       elif type == 'transfer':
+           return " and transfer_file = 'Y' "
+       else:
+           return ''
+       
+       
+   def stage_dmp_files(self, **kwargs):
+       print("stage_dmp_files() ")
+       log_file_id = None 
+        
+       conn = None
+       cur = None
+       try:
+            if kwargs['log_file_id'] == None:
+                log_file_id = self.get_current_log_file_id() 
+            
+            conn = self.get_db_connection()
+            cur = conn.cursor() 
+            cur.callproc('I2B2_BLUE.DATA_STAGE_PKG.IMPORT_DMP_FILES',['I2B2_BLUE', log_file_id])
+            conn.commit()
+                    
+       except cx_Oracle.DatabaseError as e: 
+            raise
+            
+       finally:
+            if cur!=None:
+                cur.close()
+                
+            if conn!=None:
+                conn.close()
+
+     
+   def get_files(self, **kwargs):
+        print("get_files() ")
+        files = [] 
+        log_file_id = None
+
+        
+        conn = None
+        cur = None
+        try:
+            if kwargs['log_file_id'] == None:
+                log_file_id = self.get_current_log_file_id() 
+            
+            conn = self.get_db_connection()
+            cur = conn.cursor() 
+            condition = self._condition(**kwargs)
+            statement = (
+                "select log_file_id, dmp_file_name from  LOG_FILE_DMP_FILES where log_file_id in (:log_file_id) " +  condition
             )
             cur.execute(statement, {"log_file_id": log_file_id})
-            rows = cur.fetchall() 
-            
-            print(rows)
-            
+            rows = cur.fetchall()  
             if rows != None:
                 for row in rows:
                     files.append(row[1])
