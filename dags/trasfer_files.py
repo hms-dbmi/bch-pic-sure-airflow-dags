@@ -70,7 +70,7 @@ with DAG( "TRANSFER_FILES",
           catchup=False,
           orientation="TB",
           tags=['TRANSFER'],
-          dagrun_timeout=timedelta(hours=1)
+          dagrun_timeout=timedelta(hours=6)
     ) as dag:
      
 

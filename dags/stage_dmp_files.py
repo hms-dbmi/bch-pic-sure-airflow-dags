@@ -69,7 +69,7 @@ with DAG( "STAGE_DMP_FILES",
           catchup=False,
           orientation="TB",
           tags=['STAGE'],
-          dagrun_timeout=timedelta(hours=48)
+          dagrun_timeout=timedelta(hours=72)
     ) as dag:
      
 
