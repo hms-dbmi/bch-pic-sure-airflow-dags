@@ -26,8 +26,10 @@ def begin_pipeline(**kwargs):
     dp = DagPebbles()
     log_file = kwargs['dag_run'].conf.get('log_file')
     kwargs["ti"].xcom_push(key="log_file", value=log_file) 
+    s_list = log_file.split("/")
+    s3_key = s_list[-1:][0]
     kwargs["ti"].xcom_push(key="S3_BUCKET", value=os.environ.get("S3_BUCKET",""))
-    print("log_file: ",log_file)
+    kwargs["ti"].xcom_push(key="s3_key", value=s3_key)
     #TODO::
 
 def pipeline_enable_check(**kwargs):
@@ -46,7 +48,8 @@ def pipeline_check_passed(**kwargs):
 def save_pipeline_log(**kwargs):
     print("save_pipeline_log:") 
     dp = DagPebbles()
-    dp.save_pipeline_log(kwargs['dag_run'].conf.get('log_file'))
+    file = kwargs["ti"].xcom_pull(key='s3_key')
+    dp.save_pipeline_log(kwargs['dag_run'].conf.get('log_file'), file)
      
   
 def validate_log_file(**kwargs):
@@ -118,13 +121,13 @@ t_pipeline_check_passed = PythonOperator(
     dag=dag,
 )
 
-download_log_file_cmd = "/opt/bitnami/airflow/airflow-data/scripts/download_s3_file.sh  " + "{{ dag_run.conf['log_file'] }} {{ ti.xcom_pull(key='S3_BUCKET')}} {{ ti.xcom_pull(key='SKIP_DOWNLOAD_LOG_FILE')}} "
+download_log_file_cmd = "/opt/bitnami/airflow/airflow-data/scripts/download_s3_file.sh  " + " {{ ti.xcom_pull(key='S3_BUCKET')}} {{ dag_run.conf['log_file'] }} {{ ti.xcom_pull(key='s3_key') }}  {{ ti.xcom_pull(key='SKIP_DOWNLOAD_LOG_FILE')}}  "
 t_download_log_file = BashOperator(
     task_id='download_log_file',
     bash_command=download_log_file_cmd,
     dag=dag)
 
-decrypt_log_file_cmd = "/opt/bitnami/airflow/airflow-data/scripts/decrypt_s3_file.sh  " + "{{ dag_run.conf['log_file'] }} {{ dag_run.conf['log_file'] }} {{ ti.xcom_pull(key='SKIP_DECRYPT_LOG_FILE')}} "
+decrypt_log_file_cmd = "/opt/bitnami/airflow/airflow-data/scripts/decrypt_s3_file.sh  " + "{{ ti.xcom_pull(key='s3_key') }} {{ ti.xcom_pull(key='SKIP_DECRYPT_LOG_FILE')}} "
 t_decrypt_log_file = BashOperator(
     task_id='decrypt_log_file',
     bash_command=decrypt_log_file_cmd,

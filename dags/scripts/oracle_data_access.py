@@ -64,16 +64,17 @@ class OracleDataAccess:
             conn = self.get_db_connection()
             cur = conn.cursor() 
             statement = (
-                "select a.id, a.log_file_name,a.created_at, b.status from PIPELINE_LOG_FILE a, PIPELINES b  where b.status = 'RUNNING' and a.id = b.log_file_id"
+                "select a.id, a.log_file_path, a.log_file_name,a.created_at, b.status from PIPELINE_LOG_FILE a, PIPELINES b  where b.status = 'RUNNING' and a.id = b.log_file_id"
             )
             cur.execute(statement, {})
             row = cur.fetchone() 
             
             pipeline = {
                 "id": row[0],
-                "log_file_name": row[1],
-                "created_at": row[2],
-                "status": row[3],
+                "log_file_path": row[1],
+                "log_file_name": row[2],
+                "created_at": row[3],
+                "status": row[4],
                 "files": files
             }
             
@@ -209,8 +210,8 @@ class OracleDataAccess:
 
         return files
     
-   def save_pipeline_log(self, log_file_name, log_data):
-        print("save_pipeline_log(): log_file_name:{0}".format(log_file_name))
+   def save_pipeline_log(self, log_file_path, log_file_name, log_data):
+        print("save_pipeline_log(): log_file_name: {0}, {1}".format(log_file_path, log_file_name))
         
         conn = None
         cur = None
@@ -219,14 +220,14 @@ class OracleDataAccess:
             conn = self.get_db_connection()
             cur = conn.cursor() 
             pu = PipelineUtils()
-            statement = 'insert into PIPELINE_LOG_FILE(id, log_file_name) values (:id, :log_file_name)'
-            cur.execute(statement, (pu.generate_uuid(), log_file_name))
+            statement = 'insert into PIPELINE_LOG_FILE(id, log_file_path, log_file_name) values (:id, :log_file_path,  :log_file_name)'
+            cur.execute(statement, (pu.generate_uuid(), log_file_path, log_file_name))
              
              
             statement = (
-                "select id,log_file_name from  PIPELINE_LOG_FILE where log_file_name in (:log_file_name)"
+                "select id, log_file_path, log_file_name from  PIPELINE_LOG_FILE where log_file_name in (:log_file_name)"
             )
-            cur.execute(statement, {"log_file_name": log_file_name})
+            cur.execute(statement, {"log_file_path": log_file_path, "log_file_name": log_file_name})
             row = cur.fetchone() 
             log_file_id = None
             

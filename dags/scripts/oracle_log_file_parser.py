@@ -25,6 +25,9 @@ class OracleLogFileParser:
                     self.exported_object_list.append(line)
                 elif line.startswith('/rc_exp/data_dump/'): 
                     self.dump_file_list.append(line)
+                elif line.startswith('/ora_exp/DWPRD/datapump/'):
+                    self.dump_file_list.append(line)
+                    
         
     def get_schema(self, str): 
         str = str.replace("\"","")
@@ -86,8 +89,9 @@ class OracleLogFileParser:
         
     def build_dmp_file_list(self): 
         for line in self.dump_file_list:
-            x = line.split("/")
-            self.dmp_files.append(x[4])
+            s_list = line.split("/")
+            x = s_list[-1:][0]
+            self.dmp_files.append(x)
             
     def print_log_json(self): 
         return json.dumps(self.get_log_object(), indent = 4)   
