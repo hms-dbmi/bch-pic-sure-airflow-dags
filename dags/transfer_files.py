@@ -25,7 +25,15 @@ default_args = {
 
 def begin_pipeline(**kwargs):
     print("begin_pipeline:")
-    #TODO:: 
+    dp = DagPebbles()
+    pipeline = dp.get_current_pipeline() 
+    s3_bucket = os.environ.get("S3_BUCKET","")
+    folder_path = pipeline['log_file_path']  
+    s3_file = pipeline['log_file_name'] 
+    download_key = dp.get_download_key(s3_bucket, folder_path, s3_file) 
+    kwargs["ti"].xcom_push(key="folder_path", value=folder_path)
+    kwargs["ti"].xcom_push(key="s3_file", value=s3_file)   
+    kwargs["ti"].xcom_push(key="download_key", value=download_key)
     
 def pipeline_enable_check(**kwargs):
     dp = DagPebbles()
@@ -143,8 +151,12 @@ with DAG( "TRANSFER_FILES",
     try: 
         dp = DagPebbles() 
         pipeline = dp.get_current_pipeline()  
-        log_file = DATA_LOCATION + "/"+ pipeline['log_file_name'].replace(".encrypted", "")
-        transfer_log_file_cmd = "perl  /opt/bitnami/airflow/airflow-data/scripts/transfer_file_rds.pl   " +  log_file + "   {{ ti.xcom_pull(key='SKIP_TRANSFER_FILES')}}"
+        s3_file = pipeline['log_file_name']
+        s3_file = DATA_LOCATION + "/"+ s3_file
+        transfer_log_file_cmd = "perl  /opt/bitnami/airflow/airflow-data/scripts/transfer_file_rds.pl   " +  s3_file + "   {{ ti.xcom_pull(key='SKIP_TRANSFER_FILES')}}"
+        
+        print("transfer_log_file_cmd: ")
+        print(transfer_log_file_cmd)
         t_transfer_log_file = BashOperator(
             task_id='transfer_log_file',
             bash_command=transfer_log_file_cmd,
@@ -158,8 +170,8 @@ with DAG( "TRANSFER_FILES",
             t_transfer_log_file  >> t_end_pipeline
         else:
             for index, file in enumerate(files):
-                file = DATA_LOCATION + "/"+ file.replace(".encrypted", "")
-                transfer_file_cmd = "perl  /opt/bitnami/airflow/airflow-data/scripts/transfer_file_rds.pl   " +  file + "   {{ ti.xcom_pull(key='SKIP_TRANSFER_FILES')}}"
+                s3_file = DATA_LOCATION + "/"+ file
+                transfer_file_cmd = "perl  /opt/bitnami/airflow/airflow-data/scripts/transfer_file_rds.pl   " +  s3_file + "   {{ ti.xcom_pull(key='SKIP_TRANSFER_FILES')}}"
                 t_transfer_dmp_file = BashOperator(
                     task_id='transfer_dmp_file_'+str(index),
                     bash_command=transfer_file_cmd,

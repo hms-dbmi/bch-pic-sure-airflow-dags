@@ -23,8 +23,18 @@ default_args = {
 
 
 def begin_pipeline(**kwargs):
-    print("begin_pipeline:")
-    #TODO:: 
+    print("begin_pipeline:")  
+    dp = DagPebbles()
+    pipeline = dp.get_current_pipeline() 
+    s3_bucket = os.environ.get("S3_BUCKET","")
+    folder_path = pipeline['log_file_path']  
+    s3_file = pipeline['log_file_name'] 
+    download_key = dp.get_download_key(s3_bucket, folder_path, s3_file) 
+    kwargs["ti"].xcom_push(key="folder_path", value=folder_path)
+    kwargs["ti"].xcom_push(key="s3_file", value=s3_file)   
+    kwargs["ti"].xcom_push(key="download_key", value=download_key) 
+    
+    
     
 def pipeline_enable_check(**kwargs):
     dp = DagPebbles()
@@ -143,8 +153,11 @@ with DAG( "DOWNLOAD_FILES",
     try: 
         dp = DagPebbles() 
         pipeline = dp.get_current_pipeline()  
-
-        download_log_file_cmd = "/opt/bitnami/airflow/airflow-data/scripts/download_s3_file.sh  " + " {{ ti.xcom_pull(key='S3_BUCKET')}} "+ pipeline['log_file_path'] + pipeline['log_file_name']+ " N "
+        s3_bucket = os.environ.get("S3_BUCKET","")
+        folder_path = pipeline['log_file_path']  
+        s3_file = pipeline['log_file_name']
+        download_key = dp.get_download_key(s3_bucket, folder_path, s3_file) 
+        download_log_file_cmd = "/opt/bitnami/airflow/airflow-data/scripts/download_s3_file.sh  " + download_key + " "  + s3_file +  " " + "N"
         t_download_log_file = BashOperator(
             task_id='download_log_file',
             bash_command=download_log_file_cmd,
@@ -156,7 +169,12 @@ with DAG( "DOWNLOAD_FILES",
             t_download_log_file  >> t_end_pipeline
         else:
             for index, file in enumerate(files):
-                download_dmp_file_cmd = "/opt/bitnami/airflow/airflow-data/scripts/download_s3_file.sh  {{ ti.xcom_pull(key='S3_BUCKET')}} "+ pipeline['log_file_path'] + file +" {{ ti.xcom_pull(key='SKIP_DOWNLOAD_FILES')}} "
+                s3_bucket = os.environ.get("S3_BUCKET","")
+                folder_path = pipeline['log_file_path']  
+                s3_file = file
+                download_key = dp.get_download_key(s3_bucket, folder_path, s3_file) 
+                
+                download_dmp_file_cmd = "/opt/bitnami/airflow/airflow-data/scripts/download_s3_file.sh  " + download_key + " "  + s3_file +  " " + " {{ ti.xcom_pull(key='SKIP_DOWNLOAD_FILES')}} "                                
                 t_download_dmp_file = BashOperator(
                     task_id='download_dmp_file_'+str(index),
                     bash_command=download_dmp_file_cmd,

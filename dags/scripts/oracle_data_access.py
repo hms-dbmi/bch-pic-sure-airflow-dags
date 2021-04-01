@@ -227,7 +227,7 @@ class OracleDataAccess:
             statement = (
                 "select id, log_file_path, log_file_name from  PIPELINE_LOG_FILE where log_file_name in (:log_file_name)"
             )
-            cur.execute(statement, {"log_file_path": log_file_path, "log_file_name": log_file_name})
+            cur.execute(statement, {"log_file_name": log_file_name})
             row = cur.fetchone() 
             log_file_id = None
             

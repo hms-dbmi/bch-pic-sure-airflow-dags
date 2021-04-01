@@ -24,7 +24,15 @@ default_args = {
 
 def begin_pipeline(**kwargs):
     print("begin_pipeline:")
-    #TODO:: 
+    dp = DagPebbles()
+    pipeline = dp.get_current_pipeline() 
+    s3_bucket = os.environ.get("S3_BUCKET","")
+    folder_path = pipeline['log_file_path']  
+    s3_file = pipeline['log_file_name'] 
+    download_key = dp.get_download_key(s3_bucket, folder_path, s3_file) 
+    kwargs["ti"].xcom_push(key="folder_path", value=folder_path)
+    kwargs["ti"].xcom_push(key="s3_file", value=s3_file)   
+    kwargs["ti"].xcom_push(key="download_key", value=download_key) 
     
 def pipeline_enable_check(**kwargs):
     dp = DagPebbles()
@@ -141,9 +149,10 @@ with DAG( "DECRYPT_FILES",
     
     try: 
         dp = DagPebbles() 
-        pipeline = dp.get_current_pipeline() 
+        pipeline = dp.get_current_pipeline()
+        s3_file = pipeline['log_file_name'] 
         target_log_file = pipeline['log_file_name'].replace(".encrypted", "")
-        decrypt_log_file_cmd = "/opt/bitnami/airflow/airflow-data/scripts/decrypt_s3_file.sh  " + pipeline['log_file_name'] + " " + target_log_file + " {{ ti.xcom_pull(key='SKIP_DECRYPT_FILES')}} "
+        decrypt_log_file_cmd = "/opt/bitnami/airflow/airflow-data/scripts/decrypt_s3_file.sh  " + s3_file + " {{ ti.xcom_pull(key='SKIP_DECRYPT_FILES')}} "
         t_decrypt_log_file = BashOperator(
             task_id='decrypt_log_file',
             bash_command=decrypt_log_file_cmd,
@@ -155,9 +164,8 @@ with DAG( "DECRYPT_FILES",
         if files == None or len(files) == 0:
             t_decrypt_log_file  >> t_end_pipeline
         else:
-            for index, file in enumerate(files):
-                target_file = file.replace(".encrypted", "")
-                decrypt_dmp_file_cmd = "/opt/bitnami/airflow/airflow-data/scripts/decrypt_s3_file.sh  " + file + " " + target_file + " {{ ti.xcom_pull(key='SKIP_DECRYPT_FILES')}} "
+            for index, s3_file in enumerate(files):
+                decrypt_dmp_file_cmd = "/opt/bitnami/airflow/airflow-data/scripts/decrypt_s3_file.sh  " + s3_file + " {{ ti.xcom_pull(key='SKIP_DECRYPT_FILES')}} "
                 t_decrypt_dmp_file = BashOperator(
                     task_id='decrypt_dmp_file_'+str(index),
                     bash_command=decrypt_dmp_file_cmd,
