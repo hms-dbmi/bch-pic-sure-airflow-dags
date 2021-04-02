@@ -6,6 +6,8 @@ import os
 from collections import OrderedDict
 import traceback
 from scripts.pipeline_utils import PipelineUtils
+from test.test_statistics import AverageMixin
+from ctypes.wintypes import SHORT
 
 
 class OracleDataAccess:
@@ -261,3 +263,282 @@ class OracleDataAccess:
                 
             if conn!=None:
                 conn.close()  
+                
+                
+                
+                
+   def concept_dim_mapping_prep(self):
+       print("OracleDataAccess::concept_dim_mapping_prep()")
+        
+       conn = None
+       cur = None
+       try:   
+            conn = self.get_db_connection()
+            cur = conn.cursor() 
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.concept_dim_mapping_prep',[])
+            conn.commit() 
+       except cx_Oracle.DatabaseError as e: 
+            raise 
+       finally:
+            if cur!=None:
+                cur.close()
+                
+            if conn!=None:
+                conn.close()                
+                
+   def concept_dim_allergies(self):
+       print("OracleDataAccess::concept_dim_allergies()")
+        
+       conn = None
+       cur = None
+       try:   
+            conn = self.get_db_connection()
+            cur = conn.cursor() 
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.allergies',[])
+            conn.commit() 
+       except cx_Oracle.DatabaseError as e: 
+            raise 
+       finally:
+            if cur!=None:
+                cur.close()
+                
+            if conn!=None:
+                conn.close()        
+    
+   def concept_dim_specimens(self):
+       print("OracleDataAccess::concept_dim_specimens()")
+       
+       conn = None
+       cur = None
+       try:   
+            conn = self.get_db_connection()
+            cur = conn.cursor() 
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.specimens',[])
+            conn.commit() 
+       except cx_Oracle.DatabaseError as e: 
+            raise 
+       finally:
+            if cur!=None:
+                cur.close()
+                
+            if conn!=None:
+                conn.close()        
+    
+
+   def concept_dim_clinic_site(self):
+       print("OracleDataAccess::concept_dim_clinic_site()")
+    
+       conn = None
+       cur = None
+       try:   
+            conn = self.get_db_connection()
+            cur = conn.cursor() 
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.clinic_site',[])
+            conn.commit() 
+       except cx_Oracle.DatabaseError as e: 
+            raise 
+       finally:
+            if cur!=None:
+                cur.close()
+                
+            if conn!=None:
+                conn.close()        
+
+   def concept_dim_demographics(self):
+       print("OracleDataAccess::concept_dim_demographics()")
+        
+       conn = None
+       cur = None
+       try:   
+            conn = self.get_db_connection()
+            cur = conn.cursor() 
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.demographics',[])
+            conn.commit() 
+       except cx_Oracle.DatabaseError as e: 
+            raise 
+       finally:
+            if cur!=None:
+                cur.close()
+                
+            if conn!=None:
+                conn.close()        
+    
+
+   def concept_dim_diagnosis(self):
+       print("OracleDataAccess::concept_dim_diagnosis()")
+        
+       conn = None
+       cur = None
+       try:   
+            conn = self.get_db_connection()
+            cur = conn.cursor() 
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.diagnosis',[])
+            conn.commit() 
+       except cx_Oracle.DatabaseError as e: 
+            raise 
+       finally:
+            if cur!=None:
+                cur.close()
+                
+            if conn!=None:
+                conn.close()        
+
+   def concept_dim_insurance_payors(self):
+       print("OracleDataAccess::concept_dim_insurance_payors()")
+        
+       conn = None
+       cur = None
+       try:   
+            conn = self.get_db_connection()
+            cur = conn.cursor() 
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.insurance_payors',[])
+            conn.commit() 
+       except cx_Oracle.DatabaseError as e: 
+            raise 
+       finally:
+            if cur!=None:
+                cur.close()
+                
+            if conn!=None:
+                conn.close()        
+    
+
+   def concept_dim_laboratory_results(self):
+       print("OracleDataAccess::concept_dim_laboratory_results()")
+        
+       conn = None
+       cur = None
+       try:   
+            conn = self.get_db_connection()
+            cur = conn.cursor() 
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.laboratory_results',[])
+            conn.commit() 
+       except cx_Oracle.DatabaseError as e: 
+            raise 
+       finally:
+            if cur!=None:
+                cur.close()
+                
+            if conn!=None:
+                conn.close()        
+    
+
+   def concept_dim_medications(self):
+       print("OracleDataAccess::concept_dim_medications()")
+        
+       conn = None
+       cur = None
+       try:   
+            conn = self.get_db_connection()
+            cur = conn.cursor() 
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.medications',[])
+            conn.commit() 
+       except cx_Oracle.DatabaseError as e: 
+            raise 
+       finally:
+            if cur!=None:
+                cur.close()
+                
+            if conn!=None:
+                conn.close()        
+    
+
+   def concept_dim_notes(self):
+       print("OracleDataAccess::concept_dim_notes()")
+        
+       conn = None
+       cur = None
+       try:   
+            conn = self.get_db_connection()
+            cur = conn.cursor() 
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.notes',[])
+            conn.commit() 
+       except cx_Oracle.DatabaseError as e: 
+            raise 
+       finally:
+            if cur!=None:
+                cur.close()
+                
+            if conn!=None:
+                conn.close()        
+    
+
+   def concept_dim_procedures(self):
+       print("OracleDataAccess::concept_dim_procedures()")
+        
+       conn = None
+       cur = None
+       try:   
+            conn = self.get_db_connection()
+            cur = conn.cursor() 
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.procedures',[])
+            conn.commit() 
+       except cx_Oracle.DatabaseError as e: 
+            raise 
+       finally:
+            if cur!=None:
+                cur.close()
+                
+            if conn!=None:
+                conn.close()        
+    
+
+   def concept_dim_protocols(self):
+       print("OracleDataAccess::concept_dim_protocols()")
+        
+       conn = None
+       cur = None
+       try:   
+            conn = self.get_db_connection()
+            cur = conn.cursor() 
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.protocols',[])
+            conn.commit() 
+       except cx_Oracle.DatabaseError as e: 
+            raise 
+       finally:
+            if cur!=None:
+                cur.close()
+                
+            if conn!=None:
+                conn.close()        
+    
+
+   def concept_dim_services(self):
+       print("OracleDataAccess::concept_dim_services()")
+        
+       conn = None
+       cur = None
+       try:   
+            conn = self.get_db_connection()
+            cur = conn.cursor() 
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.services',[])
+            conn.commit() 
+       except cx_Oracle.DatabaseError as e: 
+            raise 
+       finally:
+            if cur!=None:
+                cur.close()
+                
+            if conn!=None:
+                conn.close()        
+   
+
+   def concept_dim_vital_signs(self):
+       print("OracleDataAccess::concept_dim_vital_signs()")
+        
+       conn = None
+       cur = None
+       try:   
+            conn = self.get_db_connection()
+            cur = conn.cursor() 
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.vital_signs',[])
+            conn.commit() 
+       except cx_Oracle.DatabaseError as e: 
+            raise 
+       finally:
+            if cur!=None:
+                cur.close()
+                
+            if conn!=None:
+                conn.close()        
+     
