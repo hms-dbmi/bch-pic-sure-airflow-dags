@@ -161,8 +161,8 @@ class OracleDataAccess:
                 log_file_id = self.get_current_log_file_id() 
             
             conn = self.get_db_connection()
-            cur = conn.cursor() 
-            cur.callproc('I2B2_BLUE.DATA_STAGE_PKG.IMPORT_DMP_FILES',['I2B2_BLUE', log_file_id])
+            cur = conn.cursor()
+            cur.callproc('I2B2_BLUE.DATA_LOAD_PKG.STAGE_DATA',['I2B2_ETL_dpump_21Jan2021_1006.log', 'I2B2_ETL_dpump_21Jan2021_1006'])
             conn.commit()
                     
        except cx_Oracle.DatabaseError as e: 
