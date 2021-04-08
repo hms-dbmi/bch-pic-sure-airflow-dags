@@ -34,7 +34,7 @@ class Mappings:
 
     def demographics(self):
         oda = OracleDataAccess()
-        return oda.concept_dim_allergies()
+        return oda.concept_dim_demographics()
     
 
     def diagnosis(self):
@@ -80,5 +80,25 @@ class Mappings:
     def vital_signs(self):
         oda = OracleDataAccess()
         return oda.concept_dim_vital_signs()
+    
+    def diagnosis_update(self):
+        oda = OracleDataAccess()
+        return oda.concept_dim_diagnosis_update()
+    
+    def procedures_update(self):
+        oda = OracleDataAccess()
+        return oda.concept_dim_procedures_update()
+    
+    def procedures_cd_load(self):
+        oda = OracleDataAccess()
+        return oda.concept_dim_procedures_cd_load()
+    
+    def other_mappings(self):
+        oda = OracleDataAccess()
+        return oda.concept_dim_other_mappings()
+    
+    def update_concept_dimension(self):
+        oda = OracleDataAccess()
+        return oda.update_concept_dimension()    
     
   

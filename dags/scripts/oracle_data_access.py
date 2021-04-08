@@ -540,5 +540,99 @@ class OracleDataAccess:
                 cur.close()
                 
             if conn!=None:
-                conn.close()        
-     
+                conn.close()  
+    
+   def concept_dim_diagnosis_update(self):
+       print("OracleDataAccess::concept_dim_diagnosis_update()")
+        
+       conn = None
+       cur = None
+       try:   
+            conn = self.get_db_connection()
+            cur = conn.cursor() 
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.diagnosis_update',[])
+            conn.commit() 
+       except cx_Oracle.DatabaseError as e: 
+            raise 
+       finally:
+            if cur!=None:
+                cur.close()
+                
+            if conn!=None:
+                conn.close()
+                
+   def concept_dim_procedures_update(self):
+       print("OracleDataAccess::concept_dim_procedures_update()")
+        
+       conn = None
+       cur = None
+       try:   
+            conn = self.get_db_connection()
+            cur = conn.cursor() 
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.procedures_update',[])
+            conn.commit() 
+       except cx_Oracle.DatabaseError as e: 
+            raise 
+       finally:
+            if cur!=None:
+                cur.close()
+                
+            if conn!=None:
+                conn.close()
+                
+   def concept_dim_procedures_cd_load(self):
+       print("OracleDataAccess::concept_dim_procedures_cd_load()")
+        
+       conn = None
+       cur = None
+       try:   
+            conn = self.get_db_connection()
+            cur = conn.cursor() 
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.procedures_cd_load',[])
+            conn.commit() 
+       except cx_Oracle.DatabaseError as e: 
+            raise 
+       finally:
+            if cur!=None:
+                cur.close()
+                
+            if conn!=None:
+                conn.close()
+                
+   def concept_dim_other_mappings(self):
+       print("OracleDataAccess::concept_dim_other_mappings()")
+        
+       conn = None
+       cur = None
+       try:   
+            conn = self.get_db_connection()
+            cur = conn.cursor() 
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.other_mappings',[])
+            conn.commit() 
+       except cx_Oracle.DatabaseError as e: 
+            raise 
+       finally:
+            if cur!=None:
+                cur.close()
+                
+            if conn!=None:
+                conn.close()
+                
+   def update_concept_dimension(self):
+       print("OracleDataAccess::update_concept_dimension()")
+        
+       conn = None
+       cur = None
+       try:   
+            conn = self.get_db_connection()
+            cur = conn.cursor() 
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.update_concept_dimension',[])
+            conn.commit() 
+       except cx_Oracle.DatabaseError as e: 
+            raise 
+       finally:
+            if cur!=None:
+                cur.close()
+                
+            if conn!=None:
+                conn.close()                                                                    

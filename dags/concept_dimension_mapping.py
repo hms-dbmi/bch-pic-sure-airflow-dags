@@ -109,7 +109,32 @@ def vital_signs(**kwargs):
     print("vital_signs:")
     m =  Mappings()
     m.vital_signs()   
-
+    
+def diagnosis_update(**kwargs):
+    print("diagnosis_update:")
+    m =  Mappings()
+    m.diagnosis_update() 
+    
+def procedures_update(**kwargs):
+    print("procedures_update:")
+    m =  Mappings()
+    m.procedures_update() 
+    
+def procedures_cd_load(**kwargs):
+    print("procedures_cd_load:")
+    m =  Mappings()
+    m.procedures_cd_load() 
+    
+def other_mappings(**kwargs):
+    print("other_mappings:")
+    m =  Mappings()
+    m.other_mappings() 
+    
+def update_concept_dimension(**kwargs):
+    print("update_concept_dimension:")
+    m =  Mappings()
+    m.update_concept_dimension() 
+    
 def end_pipeline(**kwargs):
     print("end_pipeline:")
 
@@ -299,27 +324,67 @@ with DAG( "CONCEPT_DIMENSION_MAPPING",
         python_callable=vital_signs,
         provide_context=True,
         dag=dag,
+    )    
+    
+    t_diagnosis_update = PythonOperator(
+        task_id="diagnosis_update",
+        python_callable=diagnosis_update,
+        provide_context=True,
+        dag=dag,
     )   
-        
+    
+    t_procedures_update = PythonOperator(
+        task_id="procedures_update",
+        python_callable=procedures_update,
+        provide_context=True,
+        dag=dag,
+    )    
+    
+    t_procedures_cd_load = PythonOperator(
+        task_id="procedures_cd_load",
+        python_callable=procedures_cd_load,
+        provide_context=True,
+        dag=dag,
+    )    
+    
+    t_other_mappings = PythonOperator(
+        task_id="other_mappings",
+        python_callable=other_mappings,
+        provide_context=True,
+        dag=dag,
+    )    
+    
+    t_update_concept_dimension = PythonOperator(
+        task_id="update_concept_dimension",
+        python_callable=update_concept_dimension,
+        provide_context=True,
+        dag=dag,
+    )     
     
     t_pipeline_begin >> t_check_pipeline
     t_check_pipeline >> t_pipeline_check_skipped >> t_end_pipeline 
-    t_check_pipeline >> t_pipeline_check_passed
+    t_check_pipeline >> t_pipeline_check_passed >>  t_concept_dim_mapping_prep 
+     
     
-    t_pipeline_check_passed >>  t_concept_dim_mapping_prep >> [ 
+    
+    t_concept_dim_mapping_prep>> [ 
         t_allergies,
         t_specimens,
         t_clinic_site,
-        t_demographics,
-        t_diagnosis,
+        t_demographics, 
         t_insurance_payors,
         t_laboratory_results,
         t_medications,
-        t_notes,
-        t_procedures,
+        t_notes, 
         t_protocols,
         t_services,
         t_vital_signs  
-    ] >> t_end_pipeline 
+    ] >> t_other_mappings 
+        
+    t_concept_dim_mapping_prep >> t_procedures >> t_procedures_update >> t_procedures_cd_load >> t_other_mappings 
+    
+    t_concept_dim_mapping_prep >> t_diagnosis >> t_diagnosis_update >> t_other_mappings
+    
+    t_other_mappings  >> t_update_concept_dimension >> t_end_pipeline
     
     t_end_pipeline >> t_cleanup >> t_notify >> t_end
