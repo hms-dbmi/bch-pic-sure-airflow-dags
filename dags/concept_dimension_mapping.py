@@ -115,6 +115,11 @@ def diagnosis_update(**kwargs):
     m =  Mappings()
     m.diagnosis_update() 
     
+def diagnosis_stg_update(**kwargs):
+    print("diagnosis_stg_update:")
+    m =  Mappings()
+    m.diagnosis_stg_update()
+    
 def procedures_update(**kwargs):
     print("procedures_update:")
     m =  Mappings()
@@ -333,6 +338,13 @@ with DAG( "CONCEPT_DIMENSION_MAPPING",
         dag=dag,
     )   
     
+    t_diagnosis_stg_update = PythonOperator(
+        task_id="diagnosis_stg_update",
+        python_callable=diagnosis_stg_update,
+        provide_context=True,
+        dag=dag,
+    )   
+    
     t_procedures_update = PythonOperator(
         task_id="procedures_update",
         python_callable=procedures_update,
@@ -383,7 +395,7 @@ with DAG( "CONCEPT_DIMENSION_MAPPING",
         
     t_concept_dim_mapping_prep >> t_procedures >> t_procedures_update >> t_procedures_cd_load >> t_other_mappings 
     
-    t_concept_dim_mapping_prep >> t_diagnosis >> t_diagnosis_update >> t_other_mappings
+    t_concept_dim_mapping_prep >> t_diagnosis >> t_diagnosis_stg_update >> t_diagnosis_update >> t_other_mappings
     
     t_other_mappings  >> t_update_concept_dimension >> t_end_pipeline
     

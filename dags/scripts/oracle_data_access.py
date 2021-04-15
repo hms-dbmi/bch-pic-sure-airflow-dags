@@ -540,7 +540,26 @@ class OracleDataAccess:
                 cur.close()
                 
             if conn!=None:
-                conn.close()  
+                conn.close()
+                
+   def concept_dim_diagnosis_stg_update(self):
+       print("OracleDataAccess::concept_dim_diagnosis_stg_update()")
+        
+       conn = None
+       cur = None
+       try:   
+            conn = self.get_db_connection()
+            cur = conn.cursor() 
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.diagnosis_stg_update',[])
+            conn.commit() 
+       except cx_Oracle.DatabaseError as e: 
+            raise 
+       finally:
+            if cur!=None:
+                cur.close()
+                
+            if conn!=None:
+                conn.close()          
     
    def concept_dim_diagnosis_update(self):
        print("OracleDataAccess::concept_dim_diagnosis_update()")

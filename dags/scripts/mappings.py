@@ -79,7 +79,11 @@ class Mappings:
 
     def vital_signs(self):
         oda = OracleDataAccess()
-        return oda.concept_dim_vital_signs()
+        return oda.concept_dim_vital_signs() 
+    
+    def diagnosis_stg_update(self):
+        oda = OracleDataAccess()
+        return oda.concept_dim_diagnosis_stg_update()    
     
     def diagnosis_update(self):
         oda = OracleDataAccess()
