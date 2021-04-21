@@ -47,6 +47,11 @@ class DagPebbles:
         oda = OracleDataAccess()
         oda.stage_dmp_files(**kwargs)
         
+    def load_data(self, **kwargs):
+        print("DagPebbles::load_data()")
+        oda = OracleDataAccess()
+        oda.load_data(**kwargs)        
+        
         
     def get_download_key(self, s3_bucket, folder_path, s3_file):
         s3_bucket = s3_bucket.strip() if s3_bucket!= None  else ""
