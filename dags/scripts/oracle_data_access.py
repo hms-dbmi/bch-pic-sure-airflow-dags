@@ -308,7 +308,7 @@ class OracleDataAccess:
        try:   
             conn = self.get_db_connection()
             cur = conn.cursor() 
-            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.concept_dim_mapping_prep',[])
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING_PKG.concept_dim_mapping_prep',[])
             conn.commit() 
        except cx_Oracle.DatabaseError as e: 
             raise 
@@ -327,7 +327,7 @@ class OracleDataAccess:
        try:   
             conn = self.get_db_connection()
             cur = conn.cursor() 
-            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.allergies',[])
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING_PKG.allergies',[])
             conn.commit() 
        except cx_Oracle.DatabaseError as e: 
             raise 
@@ -346,7 +346,7 @@ class OracleDataAccess:
        try:   
             conn = self.get_db_connection()
             cur = conn.cursor() 
-            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.specimens',[])
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING_PKG.specimens',[])
             conn.commit() 
        except cx_Oracle.DatabaseError as e: 
             raise 
@@ -366,7 +366,7 @@ class OracleDataAccess:
        try:   
             conn = self.get_db_connection()
             cur = conn.cursor() 
-            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.clinic_site',[])
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING_PKG.clinic_site',[])
             conn.commit() 
        except cx_Oracle.DatabaseError as e: 
             raise 
@@ -385,7 +385,7 @@ class OracleDataAccess:
        try:   
             conn = self.get_db_connection()
             cur = conn.cursor() 
-            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.demographics',[])
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING_PKG.demographics',[])
             conn.commit() 
        except cx_Oracle.DatabaseError as e: 
             raise 
@@ -405,7 +405,7 @@ class OracleDataAccess:
        try:   
             conn = self.get_db_connection()
             cur = conn.cursor() 
-            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.diagnosis',[])
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING_PKG.diagnosis',[])
             conn.commit() 
        except cx_Oracle.DatabaseError as e: 
             raise 
@@ -424,7 +424,7 @@ class OracleDataAccess:
        try:   
             conn = self.get_db_connection()
             cur = conn.cursor() 
-            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.insurance_payors',[])
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING_PKG.insurance_payors',[])
             conn.commit() 
        except cx_Oracle.DatabaseError as e: 
             raise 
@@ -444,7 +444,7 @@ class OracleDataAccess:
        try:   
             conn = self.get_db_connection()
             cur = conn.cursor() 
-            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.laboratory_results',[])
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING_PKG.laboratory_results',[])
             conn.commit() 
        except cx_Oracle.DatabaseError as e: 
             raise 
@@ -464,7 +464,7 @@ class OracleDataAccess:
        try:   
             conn = self.get_db_connection()
             cur = conn.cursor() 
-            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.medications',[])
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING_PKG.medications',[])
             conn.commit() 
        except cx_Oracle.DatabaseError as e: 
             raise 
@@ -484,7 +484,7 @@ class OracleDataAccess:
        try:   
             conn = self.get_db_connection()
             cur = conn.cursor() 
-            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.notes',[])
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING_PKG.notes',[])
             conn.commit() 
        except cx_Oracle.DatabaseError as e: 
             raise 
@@ -504,7 +504,7 @@ class OracleDataAccess:
        try:   
             conn = self.get_db_connection()
             cur = conn.cursor() 
-            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.procedures',[])
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING_PKG.procedures',[])
             conn.commit() 
        except cx_Oracle.DatabaseError as e: 
             raise 
@@ -524,7 +524,7 @@ class OracleDataAccess:
        try:   
             conn = self.get_db_connection()
             cur = conn.cursor() 
-            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.protocols',[])
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING_PKG.protocols',[])
             conn.commit() 
        except cx_Oracle.DatabaseError as e: 
             raise 
@@ -544,7 +544,7 @@ class OracleDataAccess:
        try:   
             conn = self.get_db_connection()
             cur = conn.cursor() 
-            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.services',[])
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING_PKG.services',[])
             conn.commit() 
        except cx_Oracle.DatabaseError as e: 
             raise 
@@ -564,7 +564,7 @@ class OracleDataAccess:
        try:   
             conn = self.get_db_connection()
             cur = conn.cursor() 
-            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.vital_signs',[])
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING_PKG.vital_signs',[])
             conn.commit() 
        except cx_Oracle.DatabaseError as e: 
             raise 
@@ -583,7 +583,7 @@ class OracleDataAccess:
        try:   
             conn = self.get_db_connection()
             cur = conn.cursor() 
-            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.diagnosis_stg_update',[])
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING_PKG.diagnosis_stg_update',[])
             conn.commit() 
        except cx_Oracle.DatabaseError as e: 
             raise 
@@ -602,7 +602,7 @@ class OracleDataAccess:
        try:   
             conn = self.get_db_connection()
             cur = conn.cursor() 
-            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.diagnosis_update',[])
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING_PKG.diagnosis_update',[])
             conn.commit() 
        except cx_Oracle.DatabaseError as e: 
             raise 
@@ -621,7 +621,7 @@ class OracleDataAccess:
        try:   
             conn = self.get_db_connection()
             cur = conn.cursor() 
-            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.procedures_update',[])
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING_PKG.procedures_update',[])
             conn.commit() 
        except cx_Oracle.DatabaseError as e: 
             raise 
@@ -640,7 +640,7 @@ class OracleDataAccess:
        try:   
             conn = self.get_db_connection()
             cur = conn.cursor() 
-            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.procedures_cd_load',[])
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING_PKG.procedures_cd_load',[])
             conn.commit() 
        except cx_Oracle.DatabaseError as e: 
             raise 
@@ -659,7 +659,7 @@ class OracleDataAccess:
        try:   
             conn = self.get_db_connection()
             cur = conn.cursor() 
-            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.other_mappings',[])
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING_PKG.other_mappings',[])
             conn.commit() 
        except cx_Oracle.DatabaseError as e: 
             raise 
@@ -678,7 +678,7 @@ class OracleDataAccess:
        try:   
             conn = self.get_db_connection()
             cur = conn.cursor() 
-            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING.update_concept_dimension',[])
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING_PKG.update_concept_dimension',[])
             conn.commit() 
        except cx_Oracle.DatabaseError as e: 
             raise 
