@@ -8,8 +8,8 @@ from airflow.operators.python_operator import PythonOperator, BranchPythonOperat
 from datetime import date, timedelta, datetime
 from collections import OrderedDict  
 from scripts.dag_pebbles import DagPebbles
-from airflow.operators.docker_operator import DockerOperator
 from airflow.configuration import conf
+from airflow.operators.dummy_operator import DummyOperator
 
 default_args = {
     "owner": "anilkdegala",

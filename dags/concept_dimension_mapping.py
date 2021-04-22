@@ -9,7 +9,6 @@ from datetime import date, timedelta, datetime
 from collections import OrderedDict  
 from scripts.dag_pebbles import DagPebbles
 from scripts.mappings import Mappings
-from airflow.operators.docker_operator import DockerOperator
 from airflow.configuration import conf
 from scripts.configurations import *
 from airflow.operators.dummy_operator import DummyOperator
