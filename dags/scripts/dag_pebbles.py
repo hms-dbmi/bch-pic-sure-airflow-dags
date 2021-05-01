@@ -69,3 +69,8 @@ class DagPebbles:
         print("get_download_key: download_key: ",download_key)
     
         return download_key
+    
+    
+    def recreate_bch_hpds_data(self): 
+        oda = OracleDataAccess()
+        data = oda.recreate_bch_hpds_data() 

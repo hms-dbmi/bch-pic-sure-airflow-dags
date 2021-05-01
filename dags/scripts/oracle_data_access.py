@@ -6,8 +6,6 @@ import os
 from collections import OrderedDict
 import traceback
 from scripts.pipeline_utils import PipelineUtils
-from test.test_statistics import AverageMixin
-from ctypes.wintypes import SHORT
 
 
 class OracleDataAccess:
@@ -687,4 +685,23 @@ class OracleDataAccess:
                 cur.close()
                 
             if conn!=None:
-                conn.close()                                                                    
+                conn.close()   
+                
+   def recreate_bch_hpds_data(self):
+        conn = None
+        try:      
+            conn = self.get_db_connection()
+            cur = conn.cursor() 
+            cur.callproc('I2B2_BLUE.HPDS_DATA_LOAD_PKG.RECREATE_BCH_HPDS_DATA',[])
+            conn.commit()  
+        except cx_Oracle.DatabaseError as e: 
+            print(e)
+            error, = e.args
+            raise e  
+        except Exception as e:
+            print(e)
+            error, = e.args
+            raise e    
+        finally:
+            if not conn == None:
+                conn.close()                                                                         
