@@ -10,6 +10,7 @@ from collections import OrderedDict
 from scripts.dag_pebbles import DagPebbles
 from airflow.configuration import conf
 from airflow.operators.dummy_operator import DummyOperator
+from airflow.operators.docker_operator import DockerOperator
 
 default_args = {
     "owner": "anilkdegala",
@@ -80,7 +81,7 @@ with DAG( "HPDS_LOAD_DATA",
                 'HEAPSIZE': 4096,
                 'LOADER_NAME': 'SQLLoader',
             },
-            volumes=[os.environ["BCH_EXTERNAL"] + ":/opt/local/hpds"],
+            volumes=[os.environ["BCH_HPDS_EXTERNAL"] + ":/opt/local/hpds"],
             trigger_rule="none_failed",
         )
 
