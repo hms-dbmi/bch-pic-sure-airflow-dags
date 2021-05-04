@@ -74,3 +74,11 @@ class DagPebbles:
     def recreate_bch_hpds_data(self): 
         oda = OracleDataAccess()
         data = oda.recreate_bch_hpds_data() 
+        
+    def save_hpds_package_file_name(self, packed_file_name):
+        oda = OracleDataAccess()
+        data = oda.save_hpds_package_file_name(packed_file_name) 
+        
+    def get_hpds_packed_file_name(self):
+        oda = OracleDataAccess()
+        return oda.get_hpds_packed_file_name()

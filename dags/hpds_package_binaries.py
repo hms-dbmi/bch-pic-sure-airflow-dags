@@ -25,22 +25,19 @@ def begin_pipeline(**kwargs):
     dp = DagPebbles()
     pipeline = dp.get_current_pipeline()
     print(pipeline)
-
-def check_hpds_data_load(**kwargs):
-    if True:
-        return "hpds_sql_loader"
-    else:
-        return "skip_hpds_data_load" 
-
-def skip_hpds_data_load(**kwargs):
-    print("skip_hpds_data_load()") 
+    current_time = datetime.now() 
+    packed_file_name = "hpds_phenotype_"+ os.environ.get("BCH_PIC_SURE_HPDS_ALS_TAG")  + "_" + current_time.strftime('%m_%d_%Y_%H_%M_%S')+ "_"+ os.environ.get("BCH_PIC_SURE_HPDS_ETL_TAG") + ".tar.gz" 
+    packed_dir=os.environ.get("BCH_HPDS_INTERNAL")    
+    kwargs["ti"].xcom_push(key='packed_file_name', value=packed_file_name)
+    kwargs["ti"].xcom_push(key='packed_dir', value=packed_dir)
+    dp.save_hpds_package_file_name(packed_file_name)
 
 def end_pipeline(**kwargs):
     print("end_pipeline()")
 
 
-with DAG( "HPDS_LOAD_DATA",
-          description="Generate javabins using SQL Loader",
+with DAG( "HPDS_PACKAGE_BINARIES",
+          description="Packages HPDS Binaries",
           default_args=default_args,
           schedule_interval=None,
           catchup=False,
@@ -57,48 +54,13 @@ with DAG( "HPDS_LOAD_DATA",
         dag=dag,
     )
     
-    generate_encryption_command = " /opt/bitnami/airflow/airflow-data/scripts/generate_encryption_key.sh "
-    t_generate_encryption_key = BashOperator(
-        task_id='generate_encryption_key',
-        bash_command=generate_encryption_command ,
+    package_command = " /opt/bitnami/airflow/airflow-data/scripts/hpds_package_binaries.sh " + " {{ ti.xcom_pull(key='packed_file_name')  }} {{ ti.xcom_pull(key='packed_dir')  }} "
+    t_package_hpds_files = BashOperator(
+        task_id='package_hpds_binaries',
+        bash_command=package_command ,
         trigger_rule="none_failed",
-        dag=dag)    
-
-    t_check_hpds_data_load = BranchPythonOperator(
-        task_id="check_hpds_data_load",
-        python_callable=check_hpds_data_load,
-        provide_context=True,
-        trigger_rule="none_failed",
-        dag=dag,
-    )
-
-    t_hpds_data_load = DockerOperator(
-            default_owner='root',
-            task_id='hpds_sql_loader',
-            image=os.environ.get("BCH_PIC_SURE_HPDS_ETL_IMAGE", None),
-            api_version='auto',
-            auto_remove=True,
-            command="/bin/sleep 30",
-            docker_url="unix://var/run/docker.sock",
-            network_mode="bch_network",
-            start_date=datetime(2001, 5, 1),
-            environment={
-                'AF_EXECUTION_DATE': "{{ ds }}",
-                'AF_OWNER': "{{ task.owner }}",
-                'HEAPSIZE': 4096,
-                'LOADER_NAME': 'SQLLoader',
-            },
-            volumes=[os.environ["BCH_HPDS_EXTERNAL"] + ":/opt/local/hpds"],
-            trigger_rule="none_failed",
-        )
-
-    t_skip_hpds_data_load = PythonOperator(
-        task_id="skip_hpds_data_load",
-        python_callable=skip_hpds_data_load,
-        provide_context=True,
-        trigger_rule="none_failed",
-        dag=dag,
-    )
+        dag=dag)   
+    
     
     t_end_pipeline = PythonOperator(
         task_id="end_pipeline",
@@ -132,7 +94,4 @@ with DAG( "HPDS_LOAD_DATA",
         dag=dag,
     )
 
-    t_pipeline_begin >> t_generate_encryption_key >> t_check_hpds_data_load 
-    t_check_hpds_data_load >> t_hpds_data_load >>  t_end_pipeline
-    t_check_hpds_data_load >> t_skip_hpds_data_load >>  t_end_pipeline 
-    t_end_pipeline>> t_notify >> t_cleanup >> t_end
+    t_pipeline_begin >> t_package_hpds_files >>   t_end_pipeline >> t_notify >> t_cleanup >> t_end

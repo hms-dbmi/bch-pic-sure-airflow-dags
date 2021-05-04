@@ -705,3 +705,64 @@ class OracleDataAccess:
         finally:
             if not conn == None:
                 conn.close()                                                                         
+                
+   def save_hpds_package_file_name(self, packed_file_name):
+        print("save_hpds_package_file_name(): packed_file_name: {0}".format(packed_file_name))
+        
+        conn = None
+        cur = None
+        try:
+             
+            conn = self.get_db_connection()
+            cur = conn.cursor() 
+          
+            statement = (
+                "delete from PIPELINE_STATE where STATE_KEY in (:state_key)"
+            )
+            cur.execute(statement, {"state_key": 'HPDS_PACKED_FILE_NAME'})            
+
+ 
+            statement = 'insert into PIPELINE_STATE(STATE_KEY, STATE_VALUE) values (:state_key, :state_value)'
+            cur.execute(statement, ('HPDS_PACKED_FILE_NAME', packed_file_name))  
+                         
+            conn.commit()     
+            
+        except cx_Oracle.DatabaseError as e: 
+            raise
+            
+        finally:
+            if cur!=None:
+                cur.close()
+                
+            if conn!=None:
+                conn.close()     
+                
+   def get_hpds_packed_file_name(self):
+        print("get_hpds_packed_file_name()")
+        file_name = None
+        
+        conn = None
+        cur = None
+        try:
+            conn = self.get_db_connection()
+            cur = conn.cursor() 
+            statement = (
+                "select STATE_KEY, STATE_VALUE from  PIPELINE_STATE where STATE_KEY in (:state_key)"
+            )
+            cur.execute(statement, {"state_key": 'HPDS_PACKED_FILE_NAME'})
+            row = cur.fetchone() 
+    
+            if row != None:
+                file_name = row[1]
+                
+        except cx_Oracle.DatabaseError as e: 
+            raise
+            
+        finally:
+            if cur!=None:
+                cur.close()
+                
+            if conn!=None:
+                conn.close()
+
+        return file_name                              
