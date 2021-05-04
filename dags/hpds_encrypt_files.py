@@ -27,8 +27,11 @@ def begin_pipeline(**kwargs):
     print(pipeline)
     packed_dir=os.environ.get("BCH_HPDS_INTERNAL") 
     kwargs["ti"].xcom_push(key='packed_dir', value=packed_dir)
-    hpds_packed_file_name = dp.get_hpds_packed_file_name()
-    kwargs["ti"].xcom_push(key='hpds_packed_file_name', value=hpds_packed_file_name)
+    file_name = dp.get_hpds_packed_file_name()
+    hpds_packed_file_name = packed_dir + '/' + file_name
+    kwargs["ti"].xcom_push(key='hpds_packed_file_name', value=hpds_packed_file_name) 
+    hpds_encrypted_file = packed_dir + '/' + file_name +".encrypted"
+    kwargs["ti"].xcom_push(key='hpds_encrypted_file', value=hpds_encrypted_file) 
 
 def end_pipeline(**kwargs):
     print("end_pipeline()")
@@ -52,7 +55,7 @@ with DAG( "HPDS_ENCRYPT_FILES",
         dag=dag,
     )
     
-    encrypt_command = " /opt/bitnami/airflow/airflow-data/scripts/hpds_encrypt_files.sh " + " {{ ti.xcom_pull(key='hpds_packed_file_name')  }} {{ ti.xcom_pull(key='packed_dir')  }} "
+    encrypt_command = " /opt/bitnami/airflow/airflow-data/scripts/hpds_encrypt_binaries.sh " + " {{ ti.xcom_pull(key='hpds_packed_file_name')  }} {{ ti.xcom_pull(key='hpds_encrypted_file')  }} "
     t_encrypt_hpds_files = BashOperator(
         task_id='encrypt_hpds_binaries',
         bash_command=encrypt_command ,

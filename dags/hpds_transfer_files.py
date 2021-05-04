@@ -54,7 +54,7 @@ with DAG( "HPDS_TRANSFER_FILES",
         dag=dag,
     )
     
-    transfer_command = " /opt/bitnami/airflow/airflow-data/scripts/hpds_transfer_files.sh " + " {{ ti.xcom_pull(key='hpds_encrypted_file')  }} os.environ.get('AWS___HPDS_S3_BUCKET','') os.environ.get('AWS___HPDS_S3_BUCKET_PATH','') {{ ti.xcom_pull(key='hpds_encrypted_file_name')  }} "
+    transfer_command = " /opt/bitnami/airflow/airflow-data/scripts/hpds_transfer_files.sh " + " {{ ti.xcom_pull(key='hpds_encrypted_file')  }}"+ " " +os.environ.get('AWS___HPDS_S3_BUCKET','') + " " + os.environ.get('AWS___HPDS_S3_BUCKET_PATH','')+ " " +" {{ ti.xcom_pull(key='hpds_encrypted_file_name')  }} "
     t_transfer_hpds_files = BashOperator(
         task_id='transfer_hpds_binaries',
         bash_command=transfer_command ,
