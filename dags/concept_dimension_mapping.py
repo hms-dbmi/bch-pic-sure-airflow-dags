@@ -139,6 +139,12 @@ def update_concept_dimension(**kwargs):
     m =  Mappings()
     m.update_concept_dimension() 
     
+def validations(**kwargs):
+    print("validations:")
+    m =  Mappings()
+    m.concept_dimension_validations()    
+    
+    
 def end_pipeline(**kwargs):
     print("end_pipeline:")
 
@@ -370,7 +376,17 @@ with DAG( "CONCEPT_DIMENSION_MAPPING",
         python_callable=update_concept_dimension,
         provide_context=True,
         dag=dag,
-    )     
+    ) 
+    
+    t_validations = PythonOperator(
+        task_id="validations",
+        python_callable=validations,
+        provide_context=True,
+        dag=dag,
+    )        
+    
+    
+    
     
     t_pipeline_begin >> t_check_pipeline
     t_check_pipeline >> t_pipeline_check_skipped >> t_end_pipeline 
@@ -396,6 +412,6 @@ with DAG( "CONCEPT_DIMENSION_MAPPING",
     
     t_concept_dim_mapping_prep >> t_diagnosis >> t_diagnosis_stg_update >> t_diagnosis_update >> t_other_mappings
     
-    t_other_mappings  >> t_update_concept_dimension >> t_end_pipeline
+    t_other_mappings  >> t_update_concept_dimension >> t_validations >>  t_end_pipeline
     
     t_end_pipeline >> t_cleanup >> t_notify >> t_end

@@ -103,6 +103,11 @@ class Mappings:
     
     def update_concept_dimension(self):
         oda = OracleDataAccess()
-        return oda.update_concept_dimension()    
+        return oda.update_concept_dimension()  
+    
+    def concept_dimension_validations(self):
+        oda = OracleDataAccess()
+        return oda.concept_dimension_validations()      
+      
     
   

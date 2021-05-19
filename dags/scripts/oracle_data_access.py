@@ -685,7 +685,26 @@ class OracleDataAccess:
                 cur.close()
                 
             if conn!=None:
-                conn.close()   
+                conn.close()  
+                
+   def concept_dimension_validations(self):
+       print("OracleDataAccess::concept_dimension_validations()")
+        
+       conn = None
+       cur = None
+       try:   
+            conn = self.get_db_connection()
+            cur = conn.cursor() 
+            cur.callproc('I2B2_BLUE.CONCEPT_DIM_MAPPING_PKG.concept_dimension_validations',[])
+            conn.commit() 
+       except cx_Oracle.DatabaseError as e: 
+            raise 
+       finally:
+            if cur!=None:
+                cur.close()
+                
+            if conn!=None:
+                conn.close()                 
                 
    def recreate_bch_hpds_data(self):
         conn = None
@@ -765,4 +784,37 @@ class OracleDataAccess:
             if conn!=None:
                 conn.close()
 
-        return file_name                              
+        return file_name
+    
+   def save_pipeline_state(self, **kwargs):
+        print("OracleDataAccess::save_pipeline_state()")
+        
+        conn = None
+        cur = None
+        try:
+             
+            conn = self.get_db_connection()
+            cur = conn.cursor() 
+            
+            
+            for key, value in kwargs.items(): 
+                statement = (
+                    "delete from PIPELINE_STATE where STATE_KEY in (:state_key)"
+                )
+                cur.execute(statement, {"state_key": key})            
+    
+     
+                statement = 'insert into PIPELINE_STATE(STATE_KEY, STATE_VALUE) values (:state_key, :state_value)'
+                cur.execute(statement, (key, value))  
+                         
+            conn.commit()     
+            
+        except cx_Oracle.DatabaseError as e: 
+            raise
+            
+        finally:
+            if cur!=None:
+                cur.close()
+                
+            if conn!=None:
+                conn.close()    

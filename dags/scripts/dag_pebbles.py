@@ -82,3 +82,7 @@ class DagPebbles:
     def get_hpds_packed_file_name(self):
         oda = OracleDataAccess()
         return oda.get_hpds_packed_file_name()
+    
+    def save_pipeline_state(self, **kwargs):
+        oda = OracleDataAccess()
+        return oda.save_pipeline_state(kwargs)        

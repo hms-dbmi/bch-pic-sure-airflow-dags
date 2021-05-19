@@ -25,11 +25,29 @@ def begin_pipeline(**kwargs):
     s3_bucket = os.environ.get("S3_BUCKET","")
     folder_path = kwargs['dag_run'].conf.get('folder_path') 
     s3_file = kwargs['dag_run'].conf.get('s3_file') 
+    uuid_mapping_file = kwargs['dag_run'].conf.get('uuid_mapping_file')
+    biobank_file = kwargs['dag_run'].conf.get('biobank_file')
+    mapping_file = kwargs['dag_run'].conf.get('mapping_file')
+    
     dp = DagPebbles()  
     download_key = dp.get_download_key(s3_bucket, folder_path, s3_file) 
+    pipeline_state_args =  {
+        "s3_bucket": s3_bucket,
+        "folder_path": folder_path,
+        "s3_file": s3_file,
+        "uuid_mapping_file": uuid_mapping_file,
+        "biobank_file": biobank_file,
+        "mapping_file":mapping_file,
+        "download_key": download_key
+    }
+    dp.save_pipeline_state(**pipeline_state_args)
+    
     kwargs["ti"].xcom_push(key="folder_path", value=folder_path)
     kwargs["ti"].xcom_push(key="s3_file", value=s3_file)   
-    kwargs["ti"].xcom_push(key="download_key", value=download_key)  
+    kwargs["ti"].xcom_push(key="download_key", value=download_key)
+    kwargs["ti"].xcom_push(key="uuid_mapping_file", value=uuid_mapping_file)
+    kwargs["ti"].xcom_push(key="biobank_file", value=biobank_file)
+    kwargs["ti"].xcom_push(key="mapping_file", value=mapping_file)
     
 def pipeline_enable_check(**kwargs):
     dp = DagPebbles()
