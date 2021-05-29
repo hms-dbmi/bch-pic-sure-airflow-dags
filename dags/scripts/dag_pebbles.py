@@ -47,6 +47,11 @@ class DagPebbles:
         oda = OracleDataAccess()
         oda.stage_dmp_files(**kwargs)
         
+    def stage_custom_dmp_files(self, **kwargs):
+        print("DagPebbles::stage_custom_dmp_files()")
+        oda = OracleDataAccess()
+        oda.stage_custom_dmp_files(**kwargs)    
+        
     def load_data(self, **kwargs):
         print("DagPebbles::load_data()")
         oda = OracleDataAccess()

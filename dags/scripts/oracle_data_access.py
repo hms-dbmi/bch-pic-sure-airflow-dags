@@ -148,6 +148,27 @@ class OracleDataAccess:
            return ''
        
        
+   def stage_custom_dmp_files(self, **kwargs):
+       print("stage_custom_dmp_files() ")
+        
+       conn = None
+       cur = None
+       try:
+            conn = self.get_db_connection()
+            cur = conn.cursor()
+            cur.callproc('I2B2_BLUE.DATA_LOAD_PKG.STAGE_CUSTOM_DMP_FILES',[kwargs['custom_log_file'], kwargs['custom_dmp_file'].split('.')[0]])
+            conn.commit()
+                    
+       except cx_Oracle.DatabaseError as e: 
+            raise
+            
+       finally:
+            if cur!=None:
+                cur.close()
+                
+            if conn!=None:
+                conn.close()
+                
    def stage_dmp_files(self, **kwargs):
        print("stage_dmp_files() ")
        log_file_id = None 
@@ -175,7 +196,8 @@ class OracleDataAccess:
                 cur.close()
                 
             if conn!=None:
-                conn.close()
+                conn.close()                
+                                
 
    def load_data(self, **kwargs):
        print("load_data() ")
