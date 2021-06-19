@@ -47,6 +47,16 @@ class DagPebbles:
         oda = OracleDataAccess()
         oda.stage_dmp_files(**kwargs)
         
+    def stage_dmp_files1(self, **kwargs):
+        print("DagPebbles::stage_dmp_files1()")
+        oda = OracleDataAccess()
+        oda.stage_dmp_files1(**kwargs)
+        
+    def stage_dmp_files2(self, **kwargs):
+        print("DagPebbles::stage_dmp_files2()")
+        oda = OracleDataAccess()
+        oda.stage_dmp_files2(**kwargs)  
+        
     def stage_custom_dmp_files(self, **kwargs):
         print("DagPebbles::stage_custom_dmp_files()")
         oda = OracleDataAccess()
@@ -90,4 +100,21 @@ class DagPebbles:
     
     def save_pipeline_state(self, **kwargs):
         oda = OracleDataAccess()
-        return oda.save_pipeline_state(**kwargs)        
+        return oda.save_pipeline_state(**kwargs)   
+    
+    def stage_biobank_file(self, **kwargs):
+        print("DagPebbles::stage_biobank_file()")
+        oda = OracleDataAccess()
+        oda.stage_biobank_file(**kwargs) 
+        
+    def stage_mapping_file(self, **kwargs):
+        print("DagPebbles::stage_mapping_file()")
+        oda = OracleDataAccess()
+        oda.stage_mapping_file(**kwargs) 
+        
+    def stage_uuid_mapping_file(self, **kwargs):
+        print("DagPebbles::stage_uuid_mapping_file()")
+        oda = OracleDataAccess()
+        oda.stage_uuid_mapping_file(**kwargs)                 
+
+             

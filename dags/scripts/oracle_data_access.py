@@ -196,8 +196,135 @@ class OracleDataAccess:
                 cur.close()
                 
             if conn!=None:
-                conn.close()                
-                                
+                conn.close()  
+ 
+
+   def stage_dmp_files1(self, **kwargs):
+       print("stage_dmp_files1() ")
+       log_file_id = None 
+        
+       conn = None
+       cur = None
+       try:
+            if kwargs['log_file_id'] == None:
+                log_file_id = self.get_current_log_file_id() 
+                
+                
+            pipeline = self.get_current_pipeline()
+            log_file_name = pipeline['log_file_name'] 
+            
+            conn = self.get_db_connection()
+            cur = conn.cursor()
+            cur.callproc('I2B2_BLUE.DATA_LOAD_PKG.STAGE_DATA1',[log_file_name, log_file_name.split('.')[0]])
+            conn.commit()
+                    
+       except cx_Oracle.DatabaseError as e: 
+            raise
+            
+       finally:
+            if cur!=None:
+                cur.close()
+                
+            if conn!=None:
+                conn.close()
+                              
+   def stage_dmp_files2(self, **kwargs):
+       print("stage_dmp_files1() ")
+       log_file_id = None 
+        
+       conn = None
+       cur = None
+       try:
+            if kwargs['log_file_id'] == None:
+                log_file_id = self.get_current_log_file_id() 
+                
+                
+            pipeline = self.get_current_pipeline()
+            log_file_name = pipeline['log_file_name'] 
+            
+            conn = self.get_db_connection()
+            cur = conn.cursor()
+            cur.callproc('I2B2_BLUE.DATA_LOAD_PKG.STAGE_DATA2',[log_file_name, log_file_name.split('.')[0]])
+            conn.commit()
+                    
+       except cx_Oracle.DatabaseError as e: 
+            raise
+            
+       finally:
+            if cur!=None:
+                cur.close()
+                
+            if conn!=None:
+                conn.close()   
+                
+                
+               
+   def stage_biobank_file(self, **kwargs):
+       print("stage_biobank_file() ")
+
+       conn = None
+       cur = None
+       try:
+
+            conn = self.get_db_connection()
+            cur = conn.cursor()
+            cur.callproc('I2B2_BLUE.lz_data_import_pkg.stage_biobank_file')
+            conn.commit()
+                    
+       except cx_Oracle.DatabaseError as e: 
+            raise
+            
+       finally:
+            if cur!=None:
+                cur.close()
+                
+            if conn!=None:
+                conn.close()
+                
+   def stage_mapping_file(self, **kwargs):
+       print("stage_mapping_file() ")
+
+       conn = None
+       cur = None
+       try:
+            conn = self.get_db_connection()
+            cur = conn.cursor()
+            cur.callproc('I2B2_BLUE.lz_data_import_pkg.stage_mapping_file')
+            conn.commit()
+                    
+       except cx_Oracle.DatabaseError as e: 
+            raise
+            
+       finally:
+            if cur!=None:
+                cur.close()
+                
+            if conn!=None:
+                conn.close()
+                
+   def stage_uuid_mapping_file(self, **kwargs):
+       print("stage_uuid_mapping_file() ")
+
+       conn = None
+       cur = None
+       try:
+
+            conn = self.get_db_connection()
+            cur = conn.cursor()
+            cur.callproc('I2B2_BLUE.lz_data_import_pkg.stage_uuid_mapping_file')
+            conn.commit()
+                    
+       except cx_Oracle.DatabaseError as e: 
+            raise
+            
+       finally:
+            if cur!=None:
+                cur.close()
+                
+            if conn!=None:
+                conn.close()                                   
+   
+                                                
 
    def load_data(self, **kwargs):
        print("load_data() ")

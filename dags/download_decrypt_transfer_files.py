@@ -30,9 +30,9 @@ def begin_pipeline(**kwargs):
     transfer_arguments_list = []
     for f in files:
         print("download_decrypt_transfer_files: file:  ", f['name'], ', location: ', f['path'])  
-        output = f['name']+','+f['path']
+        output = f['name']+','+f['path']+','+f['final_name']
         download_decrypt_arguments = download_decrypt_arguments + " " + output
-        transfer_arguments_list.append(DATA_LOCATION + "/"+f['name'])
+        transfer_arguments_list.append(DATA_LOCATION + "/"+f['final_name'])
     
     transfer_arguments = ",".join(transfer_arguments_list)
     print("final download_decrypt_arguments: ",download_decrypt_arguments)

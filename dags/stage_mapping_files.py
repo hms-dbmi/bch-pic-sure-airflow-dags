@@ -36,15 +36,20 @@ def pipeline_enable_check(**kwargs):
 def pipeline_check_passed(**kwargs):
     print("pipeline_check_passed:")  
     
-def stage_dmp_files1(**kwargs):
-    print("stage_dmp_files1:") 
+def stage_biobank_file(**kwargs):
+    print("stage_biobank_file:") 
     dp = DagPebbles()  
-    dp.stage_dmp_files1(log_file_id = None)  
+    dp.stage_biobank_file(log_file_id = None)  
     
-def stage_dmp_files2(**kwargs):
-    print("stage_dmp_files2:") 
+def stage_mapping_file(**kwargs):
+    print("stage_mapping_file:") 
     dp = DagPebbles()  
-    dp.stage_dmp_files2(log_file_id = None)      
+    dp.stage_mapping_file(log_file_id = None)     
+    
+def stage_uuid_mapping_file(**kwargs):
+    print("stage_uuid_mapping_file:") 
+    dp = DagPebbles()  
+    dp.stage_uuid_mapping_file(log_file_id = None)      
 
 def end_pipeline(**kwargs):
     print("end_pipeline:")
@@ -67,8 +72,8 @@ def end(**kwargs):
     dp = DagPebbles()
     print("end")             
 
-with DAG( "STAGE_DMP_FILES",
-          description="Stage DMP Files",
+with DAG( "STAGE_MAPPING_FILES",
+          description="Stage Mapping Files",
           default_args=default_args,
           schedule_interval=None,
           catchup=False,
@@ -99,22 +104,26 @@ with DAG( "STAGE_DMP_FILES",
         dag=dag,
     )
 
-    t_stage_dmp_files1 = PythonOperator(
-        task_id="stage_dmp_files1",
-        python_callable=stage_dmp_files1,
+    t_stage_biobank_file = PythonOperator(
+        task_id="stage_biobank_file",
+        python_callable=stage_biobank_file,
         provide_context=True,
         dag=dag,
     )
         
-    t_stage_dmp_files2 = PythonOperator(
-        task_id="stage_dmp_files2",
-        python_callable=stage_dmp_files2,
+    t_stage_mapping_file = PythonOperator(
+        task_id="stage_mapping_file",
+        python_callable=stage_mapping_file,
         provide_context=True,
         dag=dag,
-    )  
+    )
     
-      
-    
+    t_stage_uuid_mapping_file = PythonOperator(
+        task_id="stage_uuid_mapping_file",
+        python_callable=stage_uuid_mapping_file,
+        provide_context=True,
+        dag=dag,
+    )    
     
     t_pipeline_check_skipped = PythonOperator(
         task_id="pipeline_check_skipped",
@@ -159,8 +168,10 @@ with DAG( "STAGE_DMP_FILES",
     t_pipeline_begin >> t_check_pipeline
     t_check_pipeline >> t_pipeline_check_skipped >> t_end_pipeline 
     t_check_pipeline >> t_pipeline_check_passed >> [ 
-        t_stage_dmp_files1,
-        t_stage_dmp_files2 
-    ] >> t_end_pipeline 
+        t_stage_biobank_file,
+        t_stage_mapping_file,
+        t_stage_uuid_mapping_file
+    ] >> t_end_pipeline  
+    
     
     t_end_pipeline >> t_cleanup >> t_notify >> t_end
