@@ -116,5 +116,11 @@ class DagPebbles:
         print("DagPebbles::stage_uuid_mapping_file()")
         oda = OracleDataAccess()
         oda.stage_uuid_mapping_file(**kwargs)                 
+        
+    def clean_hpds_source_data(self):
+        print("DagPebbles::clean_hpds_source_data()")
+        oda = OracleDataAccess()
+        oda.clean_hpds_source_data()         
+        
 
              

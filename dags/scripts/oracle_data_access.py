@@ -872,7 +872,26 @@ class OracleDataAccess:
             raise e    
         finally:
             if not conn == None:
-                conn.close()                                                                         
+                conn.close() 
+                
+   def clean_hpds_source_data(self):
+        conn = None
+        try:      
+            conn = self.get_db_connection()
+            cur = conn.cursor() 
+            cur.callproc('I2B2_BLUE.HPDS_DATA_LOAD_PKG.CLEAN_HPDS_SOURCE_DATA',[])
+            conn.commit()  
+        except cx_Oracle.DatabaseError as e: 
+            print(e)
+            error, = e.args
+            raise e  
+        except Exception as e:
+            print(e)
+            error, = e.args
+            raise e    
+        finally:
+            if not conn == None:
+                conn.close()                                                                           
                 
    def save_hpds_package_file_name(self, packed_file_name):
         print("save_hpds_package_file_name(): packed_file_name: {0}".format(packed_file_name))
