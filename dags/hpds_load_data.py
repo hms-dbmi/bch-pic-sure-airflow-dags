@@ -85,7 +85,7 @@ with DAG( "HPDS_LOAD_DATA",
             environment={
                 'AF_EXECUTION_DATE': "{{ ds }}",
                 'AF_OWNER': "{{ task.owner }}",
-                'HEAPSIZE': 4096,
+                'HEAPSIZE': 40960,
                 'LOADER_NAME': 'SQLLoader',
             },
             volumes=[os.environ["BCH_HPDS_EXTERNAL"] + ":/opt/local/hpds"],

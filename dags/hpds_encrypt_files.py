@@ -55,7 +55,7 @@ with DAG( "HPDS_ENCRYPT_FILES",
         dag=dag,
     )
     
-    encrypt_command = " /opt/bitnami/airflow/airflow-data/scripts/hpds_encrypt_binaries.sh " + " {{ ti.xcom_pull(key='hpds_packed_file_name')  }} {{ ti.xcom_pull(key='hpds_encrypted_file')  }} "
+    encrypt_command = " /opt/bitnami/airflow/airflow-data/scripts/hpds_encrypt_files.sh " + " {{ ti.xcom_pull(key='hpds_packed_file_name')  }} {{ ti.xcom_pull(key='hpds_encrypted_file')  }} "
     t_encrypt_hpds_files = BashOperator(
         task_id='encrypt_hpds_binaries',
         bash_command=encrypt_command ,
