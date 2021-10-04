@@ -34,12 +34,7 @@ def pipeline_enable_check(**kwargs):
         return "pipeline_check_skipped" 
 
 def pipeline_check_passed(**kwargs):
-    print("pipeline_check_passed:")  
-    
-def stage_dmp_files1(**kwargs):
-    print("stage_dmp_files1:") 
-    dp = DagPebbles()  
-    dp.stage_dmp_files1(log_file_id = None)  
+    print("pipeline_check_passed:") 
     
 def stage_dmp_files2(**kwargs):
     print("stage_dmp_files2:") 
@@ -98,23 +93,13 @@ with DAG( "STAGE_DMP_FILES",
         provide_context=True,
         dag=dag,
     )
-
-    t_stage_dmp_files1 = PythonOperator(
-        task_id="stage_dmp_files1",
-        python_callable=stage_dmp_files1,
-        provide_context=True,
-        dag=dag,
-    )
-        
+ 
     t_stage_dmp_files2 = PythonOperator(
         task_id="stage_dmp_files2",
         python_callable=stage_dmp_files2,
         provide_context=True,
         dag=dag,
-    )  
-    
-      
-    
+    )   
     
     t_pipeline_check_skipped = PythonOperator(
         task_id="pipeline_check_skipped",
@@ -158,8 +143,7 @@ with DAG( "STAGE_DMP_FILES",
     
     t_pipeline_begin >> t_check_pipeline
     t_check_pipeline >> t_pipeline_check_skipped >> t_end_pipeline 
-    t_check_pipeline >> t_pipeline_check_passed >> [ 
-        t_stage_dmp_files1,
+    t_check_pipeline >> t_pipeline_check_passed >> [  
         t_stage_dmp_files2 
     ] >> t_end_pipeline 
     
