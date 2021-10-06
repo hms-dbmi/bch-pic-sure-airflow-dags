@@ -144,7 +144,7 @@ with DAG( "STAGE_DMP_FILES",
     t_pipeline_begin >> t_check_pipeline
     t_check_pipeline >> t_pipeline_check_skipped >> t_end_pipeline 
     t_check_pipeline >> t_pipeline_check_passed >> [  
-        t_stage_dmp_files1 
+        t_stage_dmp_files
     ] >> t_end_pipeline 
     
     t_end_pipeline >> t_cleanup >> t_notify >> t_end
