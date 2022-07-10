@@ -259,26 +259,35 @@ class OracleDataAccess:
                 
                 
                
-   def stage_biobank_file(self, **kwargs):
-       print("stage_biobank_file() ")
-
-       conn = None
-       cur = None
-       try:
-
+   def stage_biobank_file(self, biobank_data):
+        print("stage_biobank_file() ")
+        
+        conn = None
+        cur = None
+        try:      
             conn = self.get_db_connection()
             cur = conn.cursor()
-            cur.callproc('I2B2_BLUE.lz_data_import_pkg.stage_biobank_file')
-            conn.commit()
-                    
-       except cx_Oracle.DatabaseError as e: 
-            raise
+            delete_stmt =  """
+                            delete from I2B2_BLUE.STG_BIOSTOR
             
-       finally:
-            if cur!=None:
-                cur.close()
-                
-            if conn!=None:
+                            """
+            cur.execute(delete_stmt)
+            insert_stmt = """
+                    insert into I2B2_BLUE.STG_BIOSTOR (MRN,BIOSTOR_ID,BARCODE,SAMPLE_ALIAS,STATUS,MATERIAL_NAME,MATERIAL_CODE,CONTAINER,AMOUNT,UNITS,COLLECTION_DATE,PROJECT,ORGANIZATION,ACCESSION_NUMBER,ALIQUOT_NUMBER,CONTAINER_CODE,DESCRIPTION,MATERIAL_TYPE,PARENT_BIOSTOR_ID,PARENT_SAMPLE_ALIAS,THAW_COUNT,TEMPERATURE_CURRENT,TEMPERATURE_INSTRUCTIONS,TEMPERATURE_UPON_RECEIPT,AGE_AT_COLLECTION_SUBJECT,CASE_OR_CONTROL_SAMPLE,COLLECTION_AMOUNT,PRIMARY_SPECIMEN_COL_DATE,COL_NUMBER,COL_TIME,PRIMARY_SPECIMEN_COL_TIME,PRIMARY_CONTAINER,PRIMARY_CONTAINER_CODE,PRIMARY_SPECIMEN,PRIMARY_SPECIMEN_CODE,AUTOPSY_CONSENT,PASSAGE_NUMBER,BLOOD_BORNE_PATHOGENS,FREEZING_MEDIUM,GROSS_IMPRESSION,HUMAN_TISSUE_FIXATION_TIME,HUMAN_TISSUE_COL_PROCEDURE,HUMAN_TISSUE_FREEZING_METHOD,HUMAN_TISSUE_FIXATION_TYPE,HUMAN_TISSUE_FREEZING_MEDIUM,NUCLEICACID_28S_18S,RIN,A260_A230,CONCENTRATION_BIOANALYZER,CONCENTRATION_DS_DNA,CONCENTRATION_UNKNOWN_ASSAY,A260_A280,CONCENTRATION_A260,MICROGRAMS)
+                    values (:MRN,:BIOSTOR_ID,:BARCODE,:SAMPLE_ALIAS,:STATUS,:MATERIAL_NAME,:MATERIAL_CODE,:CONTAINER,:AMOUNT,:UNITS,:COLLECTION_DATE,:PROJECT,:ORGANIZATION,:ACCESSION_NUMBER,:ALIQUOT_NUMBER,:CONTAINER_CODE,:DESCRIPTION,:MATERIAL_TYPE,:PARENT_BIOSTOR_ID,:PARENT_SAMPLE_ALIAS,:THAW_COUNT,:TEMPERATURE_CURRENT,:TEMPERATURE_INSTRUCTIONS,:TEMPERATURE_UPON_RECEIPT,:AGE_AT_COLLECTION_SUBJECT,:CASE_OR_CONTROL_SAMPLE,:COLLECTION_AMOUNT,:PRIMARY_SPECIMEN_COL_DATE,:COL_NUMBER,:COL_TIME,:PRIMARY_SPECIMEN_COL_TIME,:PRIMARY_CONTAINER,:PRIMARY_CONTAINER_CODE,:PRIMARY_SPECIMEN,:PRIMARY_SPECIMEN_CODE,:AUTOPSY_CONSENT,:PASSAGE_NUMBER,:BLOOD_BORNE_PATHOGENS,:FREEZING_MEDIUM,:GROSS_IMPRESSION,:HUMAN_TISSUE_FIXATION_TIME,:HUMAN_TISSUE_COL_PROCEDURE,:HUMAN_TISSUE_FREEZING_METHOD,:HUMAN_TISSUE_FIXATION_TYPE,:HUMAN_TISSUE_FREEZING_MEDIUM,:NUCLEICACID_28S_18S,:RIN,:A260_A230,:CONCENTRATION_BIOANALYZER,:CONCENTRATION_DS_DNA,:CONCENTRATION_UNKNOWN_ASSAY,:A260_A280,:CONCENTRATION_A260,:MICROGRAMS)"""
+            cur.executemany(insert_stmt, biobank_data)
+            conn.commit()
+               
+        except cx_Oracle.DatabaseError as e: 
+            print(e)
+            error, = e.args
+            raise e  
+        except Exception as e:
+            print(e)
+            error, = e.args
+            raise e    
+        finally:
+            if not conn == None:
                 conn.close()
                 
    def stage_mapping_file(self, **kwargs):
@@ -302,27 +311,69 @@ class OracleDataAccess:
             if conn!=None:
                 conn.close()
                 
-   def stage_uuid_mapping_file(self, **kwargs):
-       print("stage_uuid_mapping_file() ")
-
-       conn = None
-       cur = None
-       try:
-
+   
+       
+   def stage_uuid_mapping_file(self, mappings_data):
+        print("stage_uuid_mapping_file() ")
+        
+        conn = None
+        cur = None
+        try:      
             conn = self.get_db_connection()
             cur = conn.cursor()
-            cur.callproc('I2B2_BLUE.lz_data_import_pkg.stage_uuid_mapping_file')
-            conn.commit()
-                    
-       except cx_Oracle.DatabaseError as e: 
-            raise
+            delete_stmt =  """
+                            delete from I2B2_BLUE.STG_MRN_UUID
             
-       finally:
-            if cur!=None:
-                cur.close()
+                            """
+            cur.execute(delete_stmt)
+            insert_stmt = """
+                    insert into I2B2_BLUE.STG_MRN_UUID (PATIENT_IDE, PATIENT_NUM, PATIENT_UUID, IS_ACTIVE)
+                    values (:PATIENT_IDE, :PATIENT_NUM, :PATIENT_UUID, :IS_ACTIVE)"""
+            cur.executemany(insert_stmt, mappings_data)
+            conn.commit()
+               
+        except cx_Oracle.DatabaseError as e: 
+            print(e)
+            error, = e.args
+            raise e  
+        except Exception as e:
+            print(e)
+            error, = e.args
+            raise e    
+        finally:
+            if not conn == None:
+                conn.close() 
                 
-            if conn!=None:
-                conn.close()                                   
+   def stage_mapping_data_bad_rows(self, mappings_data):
+        print("stage_mapping_data_bad_rows() ")
+        
+        conn = None
+        cur = None
+        try:      
+            conn = self.get_db_connection()
+            cur = conn.cursor()
+            delete_stmt =  """
+                            delete from I2B2_BLUE.STG_MRN_UUID_FAILED
+            
+                            """
+            cur.execute(delete_stmt)
+            insert_stmt = """
+                    insert into I2B2_BLUE.STG_MRN_UUID_FAILED (PATIENT_IDE, PATIENT_NUM, PATIENT_UUID, IS_ACTIVE)
+                    values (:PATIENT_IDE, :PATIENT_NUM, :PATIENT_UUID, :IS_ACTIVE)"""
+            cur.executemany(insert_stmt, mappings_data)
+            conn.commit()
+               
+        except cx_Oracle.DatabaseError as e: 
+            print(e)
+            error, = e.args
+            raise e  
+        except Exception as e:
+            print(e)
+            error, = e.args
+            raise e    
+        finally:
+            if not conn == None:
+                conn.close()                                  
    
                                                 
 
@@ -986,3 +1037,27 @@ class OracleDataAccess:
                 
             if conn!=None:
                 conn.close()    
+                
+                
+   def post_stage_redefinition(self):
+       print("post_stage_redefinition() ")
+        
+       conn = None
+       cur = None
+       try:
+            conn = self.get_db_connection()
+            cur = conn.cursor()
+            cur.callproc('i2b2_blue.lz_data_import_pkg.obs_fact_redefinition') 
+            conn.commit()  
+                    
+       except cx_Oracle.DatabaseError as e: 
+            raise
+            
+       finally:
+            if cur!=None:
+                cur.close()
+                
+            if conn!=None:
+                conn.close()    
+                
+                

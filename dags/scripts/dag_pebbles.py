@@ -7,6 +7,7 @@ from collections import OrderedDict
 from scripts.oracle_data_access import OracleDataAccess
 from scripts.configurations import *
 from scripts.oracle_log_file_parser import OracleLogFileParser
+import csv
 
 class DagPebbles:
     
@@ -105,22 +106,84 @@ class DagPebbles:
     def stage_biobank_file(self, **kwargs):
         print("DagPebbles::stage_biobank_file()")
         oda = OracleDataAccess()
-        oda.stage_biobank_file(**kwargs) 
+        # TEMP: p00000159_biobank.csv
+        biobank_file = 'p00000159_biobank.csv'
+        bad_data = [] 
+        biobank_data = []
+        with open(DATA_LOCATION + "/" + biobank_file, 'r') as file:
+            reader = csv.reader(file,delimiter=',')
+            next(reader)
+            cnt = 0
+            for row in reader: 
+                cnt = cnt + 1
+                try:
+                    #print(type(row), len(row))
+                    row_data = (row[0],row[1],row[2],row[3],row[4],row[5],row[6],row[7],row[8],row[9],row[10],row[11],row[12],row[13],row[14],row[15],row[16],row[17],row[18],row[19],row[20],row[21],row[22],row[23],row[24],row[25],row[26],row[27],row[28],row[29],row[30],row[31],row[32],row[33],row[34],row[35],row[36],row[37],row[38],row[39],row[40],row[41],row[42],row[43],row[44],row[45],row[46],row[47],row[48],row[49],row[50],row[51],row[52],row[53])
+                    biobank_data.append(row_data) 
+                except Exception as e:
+                    print(row)
+                    print(e)
+                    bad_row = (row,) 
+                    bad_data.append(bad_row)
+                    
+            
+        
+        oda.stage_biobank_file(biobank_data)
+        
         
     def stage_mapping_file(self, **kwargs):
         print("DagPebbles::stage_mapping_file()")
         oda = OracleDataAccess()
         oda.stage_mapping_file(**kwargs) 
         
-    def stage_uuid_mapping_file(self, **kwargs):
+    def stage_uuid_mapping_file(self, mapping_file):
         print("DagPebbles::stage_uuid_mapping_file()")
-        oda = OracleDataAccess()
-        oda.stage_uuid_mapping_file(**kwargs)                 
+        
+        oda = OracleDataAccess() 
+        bad_data = [] 
+        mappings_data = []
+        with open(DATA_LOCATION + "/" + mapping_file, 'r') as file:
+            reader = csv.reader(file,delimiter=',')
+            next(reader)
+            cnt = 0
+            for row in reader: 
+                cnt = cnt + 1
+                try:
+                    mapping = (int(row[0].strip()), int(row[1].strip()),row[2].strip() , row[3].strip()) 
+                    mappings_data.append(mapping) 
+                except IndexError as e1:
+                    print(row)
+                    print(e1)
+                    bad_row = (row[0],"","","") 
+                    bad_data.append(bad_row)
+                    pass
+                except Exception as e:
+                    print(row)
+                    print(e)
+                    bad_row = (row[0], row[1],row[2], row[3]) 
+                    bad_data.append(bad_row)
+                    pass
+                    #raise e
+        print("Mapping Data Counts")
+        print("Total records: ",cnt)
+        print("Good records: ",len(mappings_data))
+        print("Bad records: ",len(bad_data))
+        
+        
+        print(bad_data)
+        oda.stage_uuid_mapping_file(mappings_data)
+        oda.stage_mapping_data_bad_rows(bad_data) 
+                         
         
     def clean_hpds_source_data(self):
         print("DagPebbles::clean_hpds_source_data()")
         oda = OracleDataAccess()
-        oda.clean_hpds_source_data()         
+        oda.clean_hpds_source_data()     
+        
+    def post_stage_redefinition(self):
+        print("DagPebbles::post_stage_redefinition()")
+        oda = OracleDataAccess()
+        oda.post_stage_redefinition()              
         
 
              

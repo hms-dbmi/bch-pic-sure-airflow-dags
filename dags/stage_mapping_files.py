@@ -41,15 +41,10 @@ def stage_biobank_file(**kwargs):
     dp = DagPebbles()  
     dp.stage_biobank_file(log_file_id = None)  
     
-def stage_mapping_file(**kwargs):
-    print("stage_mapping_file:") 
-    dp = DagPebbles()  
-    dp.stage_mapping_file(log_file_id = None)     
-    
 def stage_uuid_mapping_file(**kwargs):
     print("stage_uuid_mapping_file:") 
     dp = DagPebbles()  
-    dp.stage_uuid_mapping_file(log_file_id = None)      
+    dp.stage_uuid_mapping_file("UUID_mapping_08Apr2022.csv")      
 
 def end_pipeline(**kwargs):
     print("end_pipeline:")
@@ -58,19 +53,7 @@ def end_pipeline(**kwargs):
 def pipeline_check_skipped(**kwargs):
     print("pipeline_check_skipped:") 
      
-def cleanup(**kwargs):
-    dp = DagPebbles()
-    print("cleanup")       
-
-    
-def notify(**kwargs):
-    dp = DagPebbles()
-    print("notify")    
-
-    
-def end(**kwargs):
-    dp = DagPebbles()
-    print("end")             
+             
 
 with DAG( "STAGE_MAPPING_FILES",
           description="Stage Mapping Files",
@@ -111,13 +94,6 @@ with DAG( "STAGE_MAPPING_FILES",
         dag=dag,
     )
         
-    t_stage_mapping_file = PythonOperator(
-        task_id="stage_mapping_file",
-        python_callable=stage_mapping_file,
-        provide_context=True,
-        dag=dag,
-    )
-    
     t_stage_uuid_mapping_file = PythonOperator(
         task_id="stage_uuid_mapping_file",
         python_callable=stage_uuid_mapping_file,
@@ -139,39 +115,14 @@ with DAG( "STAGE_MAPPING_FILES",
         trigger_rule="none_failed",
         dag=dag,
     )
-    
-    t_notify = PythonOperator(
-        task_id="send_notifications",
-        python_callable=notify,
-        provide_context=True,
-        trigger_rule="none_failed",
-        dag=dag,
-    )
-    
-    t_cleanup = PythonOperator(
-        task_id="cleanup",
-        python_callable=cleanup,
-        provide_context=True,
-        trigger_rule="none_failed",
-        dag=dag,
-    )
-    
-    t_end = PythonOperator(
-        task_id="end",
-        python_callable=end,
-        provide_context=True,
-        trigger_rule="none_failed",
-        dag=dag,
-    )
-    
+     
+      
     
     t_pipeline_begin >> t_check_pipeline
     t_check_pipeline >> t_pipeline_check_skipped >> t_end_pipeline 
     t_check_pipeline >> t_pipeline_check_passed >> [ 
         t_stage_biobank_file,
-        t_stage_mapping_file,
         t_stage_uuid_mapping_file
-    ] >> t_end_pipeline  
+    ] >> t_end_pipeline 
     
     
-    t_end_pipeline >> t_cleanup >> t_notify >> t_end
